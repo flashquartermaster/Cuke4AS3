@@ -7,3 +7,14 @@ How to use Cuke4AS3 Developer:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
 
 Source comming soon
+
+New in Version 0.3.2
+
+Cuke4AS3Lib
+Table support for tables where the headers are the first column in the table
+
+Cuke4AS3 Developer UI
+Fixed: Server Errors not being reported
+
+Cuke4AS3
+Cuke4AS3.stop() now ensures that the steps being run are destroyed if stop is called in the middle of an executing scenario
