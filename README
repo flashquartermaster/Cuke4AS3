@@ -6,9 +6,23 @@ https://github.com/flashquartermaster/Cuke4AS3/wiki
 How to use Cuke4AS3 Developer:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
 
-Source comming soon
+Latest:
 
-New in Version 0.3.2
+Version 0.3.3
+=============
+
+Cuke4AS3
+Fixed: RegExp conditional capturing groups returning no values cause "TypeError: Error #1010:" in StepMatcher
+Added: Support for Cucumber pending notifications
+
+Cuke4AS3 Developer UI
+Fixed: Xml formatting does not appear correctly in the output window
+
+Cuke4AS3Lib
+Added: Pending
+
+Version 0.3.2
+=============
 
 Cuke4AS3Lib
 Table support for tables where the headers are the first column in the table
