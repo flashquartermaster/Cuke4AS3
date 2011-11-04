@@ -10,6 +10,13 @@ Source coming soon
 
 Latest:
 
+Version 0.3.4
+=============
+
+Cuke4AS3
+Added: Snippet Text support
+Fixed: Undefined step raises WireException and halts execution
+
 Version 0.3.3
 =============
 
