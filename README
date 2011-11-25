@@ -6,38 +6,8 @@ https://github.com/flashquartermaster/Cuke4AS3/wiki
 How to use Cuke4AS3 Developer:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
 
-Source coming soon
+Important info on how to work with the source code:
+https://github.com/flashquartermaster/Cuke4AS3/wiki/Working-With-The-Source
 
-Latest:
-
-Version 0.3.4
-=============
-
-Cuke4AS3
-Added: Snippet Text support
-Fixed: Undefined step raises WireException and halts execution
-
-Version 0.3.3
-=============
-
-Cuke4AS3
-Fixed: RegExp conditional capturing groups returning no values cause "TypeError: Error #1010:" in StepMatcher
-Added: Support for Cucumber pending notifications
-
-Cuke4AS3 Developer UI
-Fixed: Xml formatting does not appear correctly in the output window
-
-Cuke4AS3Lib
-Added: Pending
-
-Version 0.3.2
-=============
-
-Cuke4AS3Lib
-Table support for tables where the headers are the first column in the table
-
-Cuke4AS3 Developer UI
-Fixed: Server Errors not being reported
-
-Cuke4AS3
-Cuke4AS3.stop() now ensures that the steps being run are destroyed if stop is called in the middle of an executing scenario
+Please Note:
+No contributions will be accepted unless they have accompanying unit tests and where necessary features and step definitions

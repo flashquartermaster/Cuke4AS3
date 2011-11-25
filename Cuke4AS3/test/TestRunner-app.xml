@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/2.6">
+
+    <id>TestRunner</id>
+
+	<filename>TestRunner</filename>
+
+	<name>TestRunner</name>
+
+	<versionNumber>0.0.0</versionNumber>
+
+	<initialWindow>
+		<content>[content]</content>
+
+	<autoOrients>false</autoOrients>
+        <fullScreen>false</fullScreen>
+        <visible>false</visible>
+    </initialWindow>
+
+    <supportedProfiles>desktop extendedDesktop</supportedProfiles>
+
+</application>

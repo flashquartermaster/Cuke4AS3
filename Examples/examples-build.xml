@@ -1,0 +1,280 @@
+<!--
+    Examples
+
+    Usage:
+        $ ant -v -f examples-build.xml package
+
+    Dependencies:
+    - Ant 1.8.2
+    - Flex 4.5.1
+
+   The goal of this build is to run and package the examples
+-->
+<project name="Examples" basedir="." default="package">
+     <!--environment-->
+	<property file="examples-build.properties"/>
+    <property file="../build.properties" />
+
+    <property name="project.name.versioned" value="${project.name}-${version.num}-${version.status}" />
+
+    <!--Check for this and create if neccessary-->
+    <property name="app.descriptor" value="../Cuke4AS3/build/Cuke4AS3-app.xml"/>
+
+	<!--<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />-->
+
+	<target name="clean">
+
+		<echo>[clean] Removing generated folders for ${project.title}</echo>
+
+		<delete dir="${dist.dir}"   quiet="true" includeEmptyDirs="true"/>
+        <delete dir="${reports.dir}"   quiet="true" includeEmptyDirs="true"/>
+
+        <delete dir="${selenium.libs.dir}">
+            <include name="Cuke4AS3*" />
+        </delete>
+
+        <echo>[clean] Folders removed successfully</echo>
+
+	</target>
+
+    <target name="init">
+
+        <echo>[init] Generating folders for ${project.title}</echo>
+
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${reports.dir}"/>
+
+        <echo>[init] Folders generated for ${project.title}</echo>
+
+    </target>
+
+    <target name="calculator" >
+
+        <echo>[calculator] Running calculator features in ${project.title}</echo>
+
+        <cuke sdk="${FLEX_HOME}"
+                adl="${ADL}"
+                descriptor="${app.descriptor}"
+                src="${calculator.src.dir}"
+                libs="${calculator.libs.dir}"
+                cucumberArgs="-f html -o ${reports.dir}/calculator-report.html -f junit -o ${reports.dir}"
+                ruby="${RUBY}"
+                cucumber="${CUCUMBER}"
+                />
+
+        <junitreport todir="${reports.dir}">
+            <fileset dir="${reports.dir}">
+            <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${reports.dir}/html"/>
+        </junitreport>
+
+        <!--Clean up after run-->
+        <delete file="${calculator.src.dir}/Cuke4AS3_Config.xml" />
+        <delete file="${calculator.src.dir}/cuke4as3_steps.swf" />
+
+        <echo>[calculator] Calculator features run complete</echo>
+
+    </target>
+
+    <!--<target name="selenium" depends="cuke4As3Lib">-->
+
+        <!--<echo>[selenium] Running selenium features in ${project.title}</echo>-->
+
+        <!--&lt;!&ndash;Run selenium&ndash;&gt;-->
+        <!--<java jar="${basedir}/Selenium/selenium/selenium-server-standalone-2.5.0.jar"-->
+              <!--fork="true" spawn="true"/>-->
+
+        <!--<cuke sdk="${FLEX_HOME}"-->
+                <!--adl="${ADL}"-->
+                <!--descriptor="${app.descriptor}"-->
+                <!--src="${selenium.src.dir}"-->
+                <!--libs="${selenium.libs.dir}"-->
+                <!--cucumberArgs="-f html -o ${reports.dir}/selenium-report.html -f junit -o ${reports.dir}"-->
+                <!--ruby="${RUBY}"-->
+                <!--cucumber="${CUCUMBER}"-->
+                <!--/>-->
+
+        <!--&lt;!&ndash;Stop selenium&ndash;&gt;-->
+        <!--<get taskname="selenium-shutdown"-->
+            <!--src="http://localhost:4444/selenium-server/driver/?cmd=shutDown"-->
+            <!--dest="shutdown.txt" ignoreerrors="true" />-->
+
+        <!--<junitreport todir="${reports.dir}">-->
+            <!--<fileset dir="${reports.dir}">-->
+            <!--<include name="TEST-*.xml"/>-->
+            <!--</fileset>-->
+            <!--<report format="frames" todir="${reports.dir}/html"/>-->
+        <!--</junitreport>-->
+
+        <!--&lt;!&ndash;Clean up after run&ndash;&gt;-->
+        <!--<delete file="${basedir}/shutdown.txt" />-->
+        <!--<delete file="${selenium.src.dir}/Cuke4AS3_Config.xml" />-->
+        <!--<delete file="${selenium.src.dir}/cuke4as3_steps.swf" />-->
+
+        <!--<echo>[selenium] Selenium features run complete</echo>-->
+
+    <!--</target>-->
+
+	<!-- Package the Build -->
+	<target name="package" depends="clean,init,calculator">
+        <!--,selenium">-->
+
+        <echo>[package] Packaging Release for ${project.title}</echo>
+
+		<tstamp>
+			<format property="touch.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+		<!-- Assemble -->
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/Calculator"/>
+        <mkdir dir="${dist.dir}/CalculatorBad"/>
+        <mkdir dir="${dist.dir}/CalculatorNoWire"/>
+		<!--<mkdir dir="${dist.dir}/Selenium"/>-->
+        <mkdir dir="${dist.dir}/reports"/>
+
+		<copy todir="${dist.dir}/Calculator">
+			<fileset dir="${calculator.dir}">
+                <exclude name="*.iml"/>
+			</fileset>
+		</copy>
+        <copy todir="${dist.dir}/CalculatorBad">
+			<fileset dir="${calculator.bad.dir}">
+                <exclude name="*.iml"/>
+			</fileset>
+		</copy>
+        <copy todir="${dist.dir}/CalculatorNoWire">
+			<fileset dir="${calculator.nowire.dir}">
+                <exclude name="*.iml"/>
+			</fileset>
+		</copy>
+		<!--<copy todir="${dist.dir}/Selenium">-->
+			<!--<fileset dir="${selenium.dir}">-->
+                <!--<exclude name="*.iml"/>-->
+			<!--</fileset>-->
+		<!--</copy>-->
+        <copy todir="${dist.dir}/reports">
+			<fileset dir="${reports.dir}"/>
+		</copy>
+
+        <!--Copy build-->
+        <copy file="examples-build.xml" tofile="${dist.dir}/examples-build.xml" overwrite="true"/>
+        <copy file="examples-build.properties" tofile="${dist.dir}/examples-build.properties" overwrite="true"/>
+
+		<!-- Zip It  -->
+		<zip destfile="${dist.dir}/${project.name.versioned}.zip">
+			<fileset dir="${dist.dir}"/>
+		</zip>
+
+		<!-- Clean Up  -->
+        <delete file="${dist.dir}/examples-build.xml"/>
+        <delete file="${dist.dir}/examples-build.properties"/>
+		<delete dir="${dist.dir}/Calculator"/>
+        <delete dir="${dist.dir}/CalculatorBad"/>
+        <delete dir="${dist.dir}/CalculatorNoWire"/>
+		<!--<delete dir="${dist.dir}/Selenium"/>-->
+        <delete dir="${dist.dir}/reports"/>
+
+		<echo>[package] Release packaged successfully for ${project.title}</echo>
+
+	</target>
+
+    <!--Support for using Cuke4as3Lib-->
+    <target name="cuke4As3Lib" depends="exists-Cuke4as3LibDir,exists-Cuke4as3Swc,compile-Cuke4as3Lib,copy-Cuke4as3Lib"/>
+
+    <target name="exists-Cuke4as3LibDir">
+        <condition property="foundLibDir">
+            <available file="../Cuke4AS3Lib/build/bin"  />
+        </condition>
+    </target>
+
+    <target name="exists-Cuke4as3Swc" if="foundLibDir">
+       <pathconvert property="foundSwc" setonempty="false" pathsep=" " >
+            <path >
+                <fileset dir="../Cuke4AS3Lib/build/bin" includes="Cuke4as3Lib-${version.num}-${version.status}.swc" />
+            </path>
+        </pathconvert>
+    </target>
+
+    <target name="compile-Cuke4as3Lib" unless="foundSwc">
+        <ant dir="../Cuke4AS3Lib" antfile="cuke4as3lib-build.xml" target="compile" inheritall="false">
+            <propertyset>
+                <propertyref prefix="build" />
+            </propertyset>
+        </ant>
+    </target>
+
+    <target name="copy-Cuke4as3Lib">
+        <copy todir="${selenium.libs.dir}" overwrite="true">
+            <fileset dir="../Cuke4AS3Lib/build/bin" includes="Cuke4as3Lib-${version.num}-${version.status}.swc" />
+        </copy>
+    </target>
+
+    <macrodef name="cuke">
+        <attribute name="sdk"/>
+        <attribute name="adl" />
+        <attribute name="descriptor" />
+        <attribute name="src"/>
+        <attribute name="libs"/>
+        <attribute name="cucumberArgs"/>
+        <attribute name="ruby"/>
+        <attribute name="cucumber"/>
+
+        <sequential>
+            <echo>SDK: @{sdk}</echo>
+            <echo>Adl: @{adl}</echo>
+            <echo>Descriptor: @{descriptor}</echo>
+            <echo>Source Directory: @{src}</echo>
+            <echo>Libs Directory: @{libs}</echo>
+            <echo>Html Output Directory: @{htmloutput}</echo>
+            <echo>Ruby exe: @{ruby}</echo>
+            <echo>Cucumber exe: @{cucumber}</echo>
+
+            <exec executable="@{adl}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+                <arg value="-profile"/>
+                <arg value="extendedDesktop"/>
+                <arg value="@{descriptor}"/>
+
+                <arg value="--"/>
+                <arg value="-srcDir" />
+                <arg value="@{src}" />
+
+                <arg value="-mxmlc" />
+                <arg value="@{sdk}/bin/mxmlc" />
+                <arg value="-mxmlcArgs" />
+                <arg value="'-compiler.library-path '@{libs}''" />
+
+                <arg value="-cucumber" />
+                <arg value="/usr/bin/cucumber" />
+                <arg value="-cucumberArgs" />
+                <arg value="'@{cucumberArgs}'" />
+
+                <arg value="-headless" />
+                <arg value="true" />
+            </exec>
+            <exec executable="@{adl}.exe" failonerror="false" osfamily="windows">
+                <arg value="-profile"/>
+                <arg value="extendedDesktop"/>
+                <arg value="@{descriptor}"/>
+
+                <arg value="--"/>
+                <arg value="-srcDir" />
+                <arg value="@{src}" />
+
+                <arg value="-mxmlc" />
+                <arg value="@{sdk}/bin/mxmlc.exe" />
+                <arg value="-mxmlcArgs" />
+                <arg value="'-compiler.library-path '@{libs}''" />
+
+                <arg value="-cucumber" />
+                <arg value="@{ruby}" />
+                <arg value="-cucumberArgs" />
+                <arg value="'@{cucumberArgs}'" />
+
+                <arg value="-headless" />
+                <arg value="true" />
+            </exec>
+        </sequential>
+    </macrodef>
+</project>

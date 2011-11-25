@@ -1,0 +1,82 @@
+Before you start working on the code base read this:
+https://github.com/flashquartermaster/Cuke4AS3/wiki/Working-With-The-Source
+
+If your just getting started with this and are a bit unsure try the DeveloperUI and its getting started
+guide first.
+https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
+
+Cuke4AS3 is a chromeless command line application and library swc.
+
+Chromeless Application
+======================
+As a chromeless app it can be run silently when installed from the commandline with the relevant args
+e.g.
+/Applications/Cuke4AS3-0.3.4-Alpha.app/Contents/MacOS/Cuke4AS3-0.3.4-Alpha [ARGS]
+
+-srcDir path to the parent directory of your features directory (in double quotes)
+E.g. -srcDir "/Users/username/Documents/Adobe Flash Builder 4.5/Calculator/src/"
+
+srcDir must contain a 'features' directory which can in turn contain a [filename].wire file
+and 'step_definitions' directory for *.as step definitions
+
+-mxmlc path to mxmlc executable
+E.g. -mxmlc "/Applications/Adobe Flash Builder 4.5/sdks/4.5.1/bin/mxmlc"
+
+-mxmlcArgs Additional compiler args for your project e.g. project libs directory or air libs
+E.g. -mxmlcArgs "'-compiler-arg arg 'path with spaces' -other-compiler-arg arg'"
+
+-cucumber osx: path to cucumber executable windows: path to ruby.exe
+-cucumberArgs Additional cucumber args (windows: start with path to cucumber)
+E.g. -cucumberArgs "'-cucumber-arg arg -other-arg arg'"
+(remember to output the cucumber results from -cucumberArgs e.g. "'-f html -o some/path/to.html'"
+or you wont get any results to view)
+
+NOTE: For mxmlc and cucumber args THE WHOLE STRING MUST BE ENCLOSED BY SINGLE QUOTES WITHOUT WHITE SPACE
+File paths with spaces in MUST BE ENCLOSED IN SINGLE QUOTES
+
+-headless true A switch to tell the app that it is chromeless and that it should exit when it finishes its run
+
+ADL
+===
+It can also be run verbosely using adl e.g
+adl -profile extendedDesktop Cuke4AS3-app.xml -- -srcDir "path/to/features/parent/dir"
+-mxmlc "path/to/mxmlc" -mxmlcArgs "'-compiler.library-path 'path/to/frameworks/libs/air/' 'path/to/project/libs''"
+-cucumber "/usr/bin/cucumber" -cucumberArgs "'-f html -o path/to/report.html'" -headless true
+
+ANT & CI
+========
+For an example of how to run it with ant and adl as part of CI see the cuke4as3-build.xml target "cucumber-self-test"
+
+SWC
+===
+As a swc it can be used as a basis for an application with a UI e.g. The DeveloperUI module
+
+============
+Release Info
+============
+
+Version 0.4.1
+=============
+
+Fixed: Swfloader never dispatches ErrorEvent.ERROR which should package up SecurityError and the two IOErrors
+Fixed: Nullpointer exception when application exits because init() has not been called
+Fixed: Move cucumber message making from StepInvoker to Cuke4as3Server. Invoker should know nothing about cucumber messages
+fixed: Move cucumber message making from StepMatcher to Cuke4as3Server. Matcher should know nothing about cucumber messages
+Added: Create command processor for cuke4as3 server
+
+Version 0.3.4
+=============
+
+Added: Snippet Text support
+Fixed: Undefined step raises WireException and halts execution
+
+Version 0.3.3
+=============
+
+Fixed: RegExp conditional capturing groups returning no values cause "TypeError: Error #1010:" in StepMatcher
+Added: Support for Cucumber pending notifications
+
+Version 0.3.2
+=============
+
+Fixed: Cuke4AS3.stop() now ensures that the steps being run are destroyed if stop is called in the middle of an executing scenario

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<annotations version="1.0">
+	<metadata name="Given" description="Given gherkin step">
+        <context name="method" />
+        <attribute  name=""
+ 					type="RegExp"
+ 	 				required="true"
+ 	 				hint="regExp"
+ 	 				defaultValue="/^Default reg exp$/"
+ 	 				description="A regular expression for matching"
+ 	 				 />
+        <!--<attribute  name="async"-->
+ 					<!--type="Boolean"-->
+ 	 				<!--required="false"-->
+ 	 				<!--hint="boolean"-->
+ 	 				<!--defaultValue="true"-->
+ 	 				<!--description="FlexUnit asynchronous support"-->
+ 	 				 <!--/>-->
+        <!--<attribute  name="async"-->
+ 					<!--type="String"-->
+ 	 				<!--required="false"-->
+ 	 				<!--defaultValue="async"-->
+ 	 				<!--description="FlexUnit asynchronous support"-->
+ 	 				 <!--/>-->
+  	</metadata>
+    <metadata name="When" description="When gherkin step">
+        <context name="method" />
+        <attribute  name=""
+ 					type="RegExp"
+ 	 				required="true"
+ 	 				hint="RegExp"
+ 	 				defaultValue="/^Default reg exp$/"
+ 	 				description="A regular expression for matching"
+ 	 				 />
+  	</metadata>
+    <metadata name="Then" description="Then gherkin step">
+        <context name="method" />
+        <attribute  name=""
+ 					type="RegExp"
+ 	 				required="true"
+ 	 				hint="RegExp"
+ 	 				defaultValue="/^Default reg exp$/"
+ 	 				description="A regular expression for matching"
+ 	 				 />
+  	</metadata>
+</annotations>

@@ -1,0 +1,612 @@
+<!--
+    Cuke4AS3
+
+    Usage:
+        $ ant -v -f cuke4as3-build.xml package
+
+    Dependencies:
+    - Ant 1.8.2
+    - Flex 4.5.1
+
+   The goal of this build is to unit test,cucumber test,compile a swc, generate asdoc,
+   package the air app and create a native installer
+
+-->
+<project name="Cuke4AS3" basedir="." default="package">
+     <!--environment-->
+	<property file="cuke4as3-build.properties"/>
+    <property file="../build.properties" />
+
+    <property name="project.name.versioned" value="${project.name}-${version.num}-${version.status}" />
+
+    <property name="output.swf" value="${output.dir}/${project.name.versioned}.swf" />
+
+    <property name="output.loc" value="${bin.dir}/${project.name.versioned}" />
+    <property name="output.swc" value="${output.loc}.swc" />
+    <property name="output.air" value="${output.loc}.air" />
+    
+	<!--<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />-->
+    <taskdef resource="flexUnitTasks.tasks" classpath="${libs.dir}/flexUnitTasks-4.1.0-33.jar" />
+
+	<target name="clean">
+
+		<echo>[clean] Removing generated folders for ${project.title}</echo>
+
+		<delete dir="${output.dir}" quiet="true" includeEmptyDirs="true"/>
+		<delete dir="${dist.dir}"   quiet="true" includeEmptyDirs="true"/>
+        <delete dir="${report.dir}" quiet="true" includeEmptyDirs="true"/>
+
+        <delete dir="${libs.dir}">
+            <include name="Cuke4as3Lib*" />
+        </delete>
+
+        <echo>[clean] Folders removed successfully</echo>
+
+	</target>
+
+    <target name="init">
+
+        <echo>[init] Generating folders for ${project.title}</echo>
+
+        <mkdir dir="${output.dir}"/>
+        <mkdir dir="${bin.dir}"/>
+        <mkdir dir="${report.dir}"/>
+
+        <echo>[init] Folders generated for ${project.title}</echo>
+
+    </target>
+
+	<target name="compile-swc" depends="init,cuke4As3Lib">
+
+		<echo>[compile-swc] Building ${project.title} swc ${project.name.versioned}</echo>
+		<echo>[compile-swc] Using Flex SDK at: ${FLEX_HOME}</echo>
+
+        <!--Make a lib for Developer UI-->
+        <java jar="${FLEX_HOME}/lib/compc.jar" dir="." fork="true" failonerror="true">
+
+			<arg value="+flexlib=${FLEX_HOME}/frameworks" />
+            <arg value="+configname=air" />
+
+			<arg value="-source-path+=${src.dir}" />
+            <arg value="-library-path+=${libs.dir}"/>
+            <arg line="-external-library-path+=${FLEX_HOME}/frameworks/libs/" />
+
+            <!-- Include all classes in this path. -->
+            <!--<arg value="-include-sources=${src.dir}" />-->
+            <arg value="-include-sources=${src.dir}/${package.dir}" />
+
+            <arg value="-incremental=true" />
+            <arg value="-verbose-stacktraces=true" />
+            <!--<arg value="-headless-server=true" />-->
+
+			<arg value="-output=${output.swc}" />
+		</java>
+
+        <echo>[compile-swc] ${project.title} swc built successfully</echo>
+
+	</target>
+
+    <target name="compile-swf" depends="cuke4As3Lib">
+
+		<echo>[compile-swf] Building ${project.title} swf ${project.name.versioned}</echo>
+		<echo>[compile-swf] Using Flex SDK at: ${FLEX_HOME}</echo>
+
+        <mkdir dir="${output.dir}"/>
+
+        <!--Make a swf for air app-->
+         <java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+
+            <arg value="+flexlib=${FLEX_HOME}/frameworks" />
+            <arg value="+configname=air" />
+			<arg value="${src.dir}/${package.dir}/${project.name}.as"/>
+            <!--<arg value="${src.dir}/${project.name}.as"/>-->
+
+			<arg value="-source-path+=${src.dir}"/>
+            <arg value="-library-path+=${libs.dir}"/>
+
+			<arg value="-static-link-runtime-shared-libraries=true"/>
+
+			<arg value="-verbose-stacktraces=true"/>
+			<!--<arg value="-headless-server=true"/>-->
+            <arg value="-incremental=true"/>
+
+            <arg value="-output=${output.swf}" />
+		</java>
+
+        <echo>[compile-swf] ${project.title} swf built successfully</echo>
+
+	</target>
+
+    <target name="make-air" depends="init,generate-certificate,make-package-bundle,compile-swf,create-descriptor">
+
+        <echo>[package-air] Packaging ${project.title} AIR app</echo>
+
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-package"/>
+
+            <arg value="-storetype"/>
+            <arg value="${cert.storetype}"/>
+
+            <arg value="-keystore"/>
+            <arg value="${output.dir}/${cert.keystore}"/>
+
+            <arg value="-storepass" />
+            <arg value="${cert.password}" />
+
+            <arg value="${output.air}"/>
+
+            <arg value="${app.descriptor}"/>
+
+            <arg line="-C ${output.dir} ${project.name.versioned}.swf bundled_libs icons" />
+        </java>
+
+        <echo>[package-air] ${project.title} AIR app packaged successfully </echo>
+
+    </target>
+    
+    <target name="generate-certificate">
+
+        <echo>[generate-certificate] Generating ${project.title} certificate</echo>
+
+        <!--Note: Certficate values derived from main build.properties-->
+        <!--in the parent directory-->
+        
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-certificate" />
+            <arg value="-cn" />
+            <arg value="${cert.name}" />
+            <arg value="-ou" />
+            <arg value="${cert.orgunit}" />
+            <arg value="-o" />
+            <arg value="${cert.orgname}" />
+            <arg value="-c" />
+            <arg value="${cert.country}" />
+            <arg value="${cert.keytype}" />
+            <arg value="${output.dir}/${cert.keystore}" />
+            <arg value="${cert.password}" />
+        </java>
+
+        <echo>[generate-certificate] ${project.title} certificate generated successfully</echo>
+
+    </target>
+
+    <target name="make-package-bundle" depends="cuke4As3Lib">
+
+        <echo>[make-bundledLibs] bundling libs for ${project.title}</echo>
+
+        <mkdir dir="${bundledlibs.dir}" />
+        <mkdir dir="${bundledlibs.dconsole.dir}" />
+        <mkdir dir="${bundledlibs.flexunit.dir}" />
+
+        <!--copy cuke4as3Lib -->
+
+        <!--<copy todir="${bundledlibs.dir}" overwrite="true" failonerror="true">-->
+            <!--<fileset dir="${libs.dir}" includes="Cuke4as3Lib-${version.num}-${version.status}.swc" />-->
+        <!--</copy>-->
+
+        <copy file="${libs.dir}/Cuke4as3Lib-${version.num}-${version.status}.swc"
+              todir="${bundledlibs.dir}"
+              failonerror="true" overwrite="true" />
+
+        <!--copy dconsole-->
+
+        <copy file="${libs.dir}/DConsole2SWC.swc"
+              todir="${bundledlibs.dconsole.dir}"
+              failonerror="true" overwrite="true"/>
+
+        <!--copy flexunit 0.9, 4 and hamcrest this is the standard set from Flash Builder-->
+
+        <copy todir="${bundledlibs.flexunit.dir}" failonerror="true" overwrite="true">
+            <fileset dir="${assets.dir}/flexunit" includes="*"/>
+        </copy>
+
+        <copy todir="${output.dir}/icons" failonerror="true" overwrite="true">
+            <fileset dir="${assets.dir}/icons" includes="*"/>
+        </copy>
+
+        <echo>[make-bundledLibs] ${project.title} libs bundle created</echo>
+
+    </target>
+
+    <target name="create-descriptor">
+
+        <echo>[create-descriptor] Set up ${project.name}-app.xml</echo>
+
+        <copy file="${src.dir}/${project.name}-app.xml" todir="${output.dir}" overwrite="true" failonerror="true"/>
+
+        <replace file="${app.descriptor}"
+                token="[id]" value="${reverse.dns}.${project.name}" />
+
+        <replace file="${app.descriptor}"
+                token="[filename]" value="${project.name.versioned}" />
+
+        <replace file="${app.descriptor}"
+                token="[name]" value="${project.name}" />
+
+        <replace file="${app.descriptor}"
+                token="[versionNumber]" value="${version.num}" />
+
+        <replace file="${app.descriptor}"
+                token="[versionLabel]" value="${version.num} ${version.status}" />
+
+        <replace file="${app.descriptor}"
+                token="[content]"  value="${project.name.versioned}.swf" />
+
+        <replace file="${app.descriptor}"
+                token="[title]" value="${project.name} ${version.num} ${version.status}" />
+
+        <echo>[create-descriptor] ${app.descriptor} sucessfully created</echo>
+
+    </target>
+
+    <target name="create-installer" depends="make-air">
+
+        <echo>[create-installer] Creating ${project.title} installer</echo>
+
+        <!--adt -package -target native "Cuke4AS3 Developer osx.dmg" "Cuke4AS3 Developer.air"-->
+
+        <exec executable="${ADT}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+            <arg value="-package"/>
+            <arg value="-target"/>
+            <arg value="native"/>
+            <arg value="${bin.dir}/${project.name.versioned}.dmg"/>
+            <arg value="${output.air}"/>
+        </exec>
+        <exec executable="${ADT}.bat" failonerror="false" osfamily="windows" failifexecutionfails="true">
+            <arg value="-package"/>
+            <arg value="-target"/>
+            <arg value="native"/>
+            <arg value="${bin.dir}/${project.name.versioned}.exe"/>
+            <arg value="${output.air}"/>
+        </exec>
+
+        <echo>[create-installer] ${project.title} installer successfully created</echo>
+
+    </target>
+
+	<target name="unittest" depends="init,cuke4As3Lib">
+
+		<echo>[unittest] Compile ${project.title} unit tests</echo>
+        
+		<!-- Compile SWF -->
+		<java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="." fork="true" failonerror="true">
+
+            <arg value="+flexlib=${FLEX_HOME}/frameworks"/>
+            <arg value="+configname=air" />
+
+			<arg value="${tests.dir}/${tests.runner}.mxml"/>
+			<arg value="-source-path+=${src.dir}"/>
+
+			<arg value="-default-size=1000,800"/>
+			<arg value="-default-background-color=0x000000"/>
+
+			<arg value="-static-link-runtime-shared-libraries=true"/>
+			<arg value="-library-path+=${libs.dir}"/>
+
+			<arg value="-verbose-stacktraces=true"/>
+            <arg value="-incremental=true"/>
+			<!--<arg value="-headless-server=true"/>-->
+
+            <arg value="-output=${tests.swf}"/>
+		</java>
+
+        <echo>[unittest] Run ${project.title} unit tests</echo>
+
+        <!--Run the tests with flexUnitTasks-->
+        <!--timeout="10000"-->
+        <flexunit player="air"
+                  swf="${tests.swf}"
+                  todir="${report.dir}"
+                  verbose="true"
+                  localTrusted="true"
+                  workingdir="${output.dir}"
+                  />
+
+        <!--Run the tests with adl-->
+        <!--<copy file="${tests.dir}/TestRunner-app.xml" todir="${output.dir}" overwrite="true" />-->
+        <!--<replace file="${output.dir}/TestRunner-app.xml"-->
+            <!--token="[content]"-->
+            <!--value="TestRunner.swf" />-->
+
+        <!--<exec executable="${ADL}" failonerror="false" osfamily="unix">-->
+            <!--<arg value="-profile"/>-->
+            <!--<arg value="extendedDesktop"/>-->
+            <!--<arg value="${output.dir}/TestRunner-app.xml"/>-->
+        <!--</exec>-->
+        <!--<exec executable="${ADL}.exe" failonerror="false" osfamily="windows">-->
+            <!--<arg value="-profile"/>-->
+            <!--<arg value="extendedDesktop"/>-->
+            <!--<arg value="${output.dir}/TestRunner-app.xml"/>-->
+        <!--</exec>-->
+
+        <!--Note: Sort out reporting output with adl when you have a spare...-->
+
+        <junitreport todir="${report.dir}">
+            <fileset dir="${report.dir}">
+            <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${report.dir}/html"/>
+        </junitreport>
+
+        <echo>[unittest] Finished running unit tests for ${project.title}</echo>
+
+	</target>
+
+	<target name="asdoc" depends="init,cuke4As3Lib">
+
+		<echo>[asdoc] Generating documentation for ${project.title}</echo>
+
+		<mkdir dir="${docs.dir}"/>
+		<tstamp>
+			<format property="docgen.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+
+		<java jar="${FLEX_HOME}/lib/asdoc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+			<!--<arg value="+flexlib=${FLEX_HOME}/frameworks"/>-->
+            <arg value="+configname=air" />
+
+            <arg line="-external-library-path+=${libs.dir}"/>
+			<arg line="-doc-sources+=${src.dir}/${package.dir}"/>
+			<arg line="-source-path+=${src.dir}"/>
+
+            <arg line="-output ${docs.dir}"/>
+            
+			<arg value="-keep-xml=true"/>
+			<arg value="-lenient=true"/>
+
+			<arg line="-window-title '${project.title} ${version.num} ${version.status}'"/>
+			<arg line="-main-title '${project.title} ${version.num} ${version.status}'"/>
+			<arg line="-footer '${project.title} - Documentation generated at: ${docgen.time}'"/>
+		</java>
+
+		<echo>[asdoc] Documentation generated successfully for ${project.title}</echo>
+        
+	</target>
+
+    <target name="cucumber-self-test" depends="init,make-package-bundle,compile-swf,create-descriptor,compile-swc">
+
+        <echo>[cucumber-self-test] Run feature files for ${project.title}</echo>
+
+        <exec executable="${ADL}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+
+            <arg value="--"/>
+            <arg value="-srcDir" />
+            <arg value="${tests.dir}" />
+
+            <arg value="-mxmlc" />
+            <arg value="${FLEX_HOME}/bin/mxmlc" />
+            <arg value="-mxmlcArgs" />
+            <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
+
+            <arg value="-cucumber" />
+            <arg value="/usr/bin/cucumber" />
+            <arg value="-cucumberArgs" />
+            <arg value="'--exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
+
+            <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
+            <!--<arg value="-headless" />-->
+            <!--<arg value="true" />-->
+        </exec>
+        <exec executable="${ADL}.exe" failonerror="false" osfamily="windows">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+
+            <arg value="--"/>
+            <arg value="-srcDir" />
+            <arg value="${src.dir}" />
+
+            <arg value="-mxmlc" />
+            <arg value="${FLEX_HOME}/bin/mxmlc.exe" />
+            <arg value="-mxmlcArgs" />
+            <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
+
+            <arg value="-cucumber" />
+            <arg value="${RUBY}" />
+            <arg value="-cucumberArgs" />
+            <arg value="'--exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
+
+            <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
+            <!--<arg value="-headless" />-->
+            <!--<arg value="true" />-->
+        </exec>
+
+        <junitreport todir="${report.dir}">
+            <fileset dir="${report.dir}">
+            <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${report.dir}/html"/>
+        </junitreport>
+
+        <!--Clean up after cuke run-->
+        <delete file="${basedir}/cucumber_steps_output.html" />
+        <delete dir="${output.dir}/features" />
+        <delete file="${src.dir}/Cuke4AS3_Config.xml" />
+        <delete file="${src.dir}/cuke4as3_steps.swf" />
+        <delete file="${tests.dir}/cuke4as3_steps.swf" />
+
+        <echo>[cucumber-self-test] Feature files successfully run for ${project.title}</echo>
+
+    </target>
+
+	<!-- Package the Build -->
+	<target name="package" depends="clean,unittest,cucumber-self-test,compile-swc,asdoc,make-air,create-installer">
+
+        <echo>[package] Packaging Release for ${project.title}</echo>
+
+		<tstamp>
+			<format property="touch.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+		<!-- Assemble -->
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/bin"/>
+		<mkdir dir="${dist.dir}/src"/>
+		<mkdir dir="${dist.dir}/test"/>
+		<mkdir dir="${dist.dir}/libs"/>
+        <mkdir dir="${dist.dir}/report"/>
+
+        <copy todir="${dist.dir}/bin">
+			<fileset dir="${bin.dir}">
+                <exclude name="*.cache"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist.dir}/libs">
+			<fileset dir="${libs.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/src">
+			<fileset dir="${src.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/test">
+			<fileset dir="${tests.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/docs">
+			<fileset dir="${docs.dir}"/>
+		</copy>
+        <copy todir="${dist.dir}/report">
+			<fileset dir="${report.dir}"/>
+		</copy>
+
+		<delete dir="${dist.dir}/docs/tempdita"/>
+		<!-- Add ASDoc xml to swc for Flex Builder Tooltips -->
+		<zip destfile="${dist.dir}/bin/${project.name.versioned}.swc" update="true">
+			<zipfileset dir="${docs.dir}/tempdita" prefix="docs">
+				<include name="*packages.dita*"/>
+				<include name="*org.*"/>
+			</zipfileset>
+		</zip>
+
+		<!-- Copy README  -->
+		<copy file="README" tofile="${dist.dir}/README" overwrite="true"/>
+
+        <!--Copy build-->
+        <copy file="cuke4as3-build.xml" tofile="${dist.dir}/cuke4as3-build.xml" overwrite="true"/>
+        <copy file="cuke4as3-build.properties" tofile="${dist.dir}/cuke4as3-build.properties" overwrite="true"/>
+
+		<!-- Zip It  -->
+		<zip destfile="${dist.dir}/${project.name.versioned}.zip">
+			<fileset dir="${dist.dir}"/>
+		</zip>
+
+		<!-- Clean Up  -->
+		<delete file="${dist.dir}/${project.name.versioned}.swc"/>
+		<delete file="${dist.dir}/README"/>
+        <delete file="${dist.dir}/cuke4as3-build.xml"/>
+        <delete file="${dist.dir}/cuke4as3-build.properties"/>
+		<delete dir="${dist.dir}/bin"/>
+		<delete dir="${dist.dir}/src"/>
+		<delete dir="${dist.dir}/test"/>
+		<delete dir="${dist.dir}/libs"/>
+		<delete dir="${dist.dir}/docs"/>
+        <delete dir="${dist.dir}/report"/>
+
+		<echo>[package] Release packaged successfully for ${project.title}</echo>
+
+	</target>
+
+    <!--Support for using Cuke4as3Lib-->
+    <target name="cuke4As3Lib" depends="exists-Cuke4as3LibDir,exists-Cuke4as3Swc,compile-Cuke4as3Lib,copy-Cuke4as3Lib"/>
+
+    <target name="exists-Cuke4as3LibDir">
+        <condition property="foundLibDir">
+            <available file="../Cuke4AS3Lib/build/bin"  />
+        </condition>
+    </target>
+
+    <target name="exists-Cuke4as3Swc" if="foundLibDir">
+       <pathconvert property="foundSwc" setonempty="false" pathsep=" " >
+            <path >
+                <fileset dir="../Cuke4AS3Lib/build/bin" includes="Cuke4as3Lib-${version.num}-${version.status}.swc" />
+            </path>
+        </pathconvert>
+    </target>
+
+    <target name="compile-Cuke4as3Lib" unless="foundSwc">
+        <ant dir="../Cuke4AS3Lib" antfile="cuke4as3lib-build.xml" target="compile" inheritall="false">
+            <propertyset>
+                <propertyref prefix="build" />
+            </propertyset>
+        </ant>
+    </target>
+
+    <target name="copy-Cuke4as3Lib">
+        <copy todir="${libs.dir}" overwrite="true">
+            <fileset dir="../Cuke4AS3Lib/build/bin" includes="Cuke4as3Lib-${version.num}-${version.status}.swc" />
+        </copy>
+    </target>
+
+    <target name="test-changes">
+        <exec executable="${ADL}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+
+            <arg value="--"/>
+            <arg value="-srcDir" />
+            <arg value="${tests.dir}" />
+
+            <arg value="-mxmlc" />
+            <arg value="${FLEX_HOME}/bin/mxmlc" />
+            <arg value="-mxmlcArgs" />
+            <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
+
+            <arg value="-cucumber" />
+            <arg value="/usr/bin/cucumber" />
+            <arg value="-cucumberArgs" />
+            <arg value="'--exclude cucumber-tck -t @cucumber'"/>
+            <!--<arg value="'-f pretty -f html -o ${report.dir}/cucumber-selftest-report.html'" />-->
+
+            <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
+            <!--<arg value="-headless" />-->
+            <!--<arg value="true" />-->
+        </exec>
+        <exec executable="${ADL}.exe" failonerror="false" osfamily="windows">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+
+            <arg value="--"/>
+            <arg value="-srcDir" />
+            <arg value="${src.dir}" />
+
+            <arg value="-mxmlc" />
+            <arg value="${FLEX_HOME}/bin/mxmlc.exe" />
+            <arg value="-mxmlcArgs" />
+            <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
+
+            <arg value="-cucumber" />
+            <arg value="${RUBY}" />
+            <arg value="-cucumberArgs" />
+            <arg value="'--exclude cucumber-tck -t @cucumber'" />
+
+            <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
+            <!--<arg value="-headless" />-->
+            <!--<arg value="true" />-->
+        </exec>
+    </target>
+
+    <!--<target name="Run-installed-headless">-->
+        <!--<exec executable="/Applications/Cuke4AS3-0.3.4-Alpha.app/Contents/MacOS/Cuke4AS3-0.3.4-Alpha" failonerror="false"
+        osfamily="unix" failifexecutionfails="true">-->
+            <!--<arg value="-srcDir" />-->
+            <!--<arg value="${tests.dir}" />-->
+
+            <!--<arg value="-mxmlc" />-->
+            <!--<arg value="${FLEX_HOME}/bin/mxmlc" />-->
+            <!--<arg value="-mxmlcArgs" />-->
+            <!--<arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />-->
+
+            <!--<arg value="-cucumber" />-->
+            <!--<arg value="/usr/bin/cucumber" />-->
+            <!--<arg value="-cucumberArgs" />-->
+            <!--<arg value="'- -tags @wire_server - -tags @dev -f html -o ${report.dir}/cucumber-selftest-report.html'"/>-->
+
+            <!--<arg value="-headless" />-->
+            <!--<arg value="true" />-->
+        <!--</exec>-->
+    <!--</target>-->
+
+</project>

@@ -1,0 +1,213 @@
+<!--
+    Cuke4AS3Lib
+
+    Usage:
+        $ ant -v -f cuke4as3lib-build.xml package
+
+    Dependencies:
+    - Ant 1.8+
+    - Flex 4.5.1
+
+   The goal of this build is to unit test, compile a swc and generate asdocs
+
+-->
+<project name="Cuke4AS3Lib" basedir="." default="package">
+     <!--environment-->
+	<property file="cuke4as3lib-build.properties"/>
+    <property file="../build.properties" />
+
+    <property name="project.name.versioned" value="${project.name}-${version.num}-${version.status}" />
+    <property name="output.swc" value="${bin.dir}/${project.name.versioned}.swc" />
+    
+	<!--<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />-->
+    <taskdef resource="flexUnitTasks.tasks" classpath="${libs.dir}/flexUnitTasks-4.1.0-33.jar" />
+
+	<target name="clean">
+
+		<echo>[clean] Removing generated folders for ${project.title}</echo>
+
+		<delete dir="${output.dir}" quiet="true" includeEmptyDirs="true"/>
+		<delete dir="${dist.dir}"   quiet="true" includeEmptyDirs="true"/>
+
+        <echo>[clean] Folders removed successfully</echo>
+
+	</target>
+
+	<target name="compile">
+
+		<echo>[compile] Building ${project.title} swc ${project.name.versioned}</echo>
+		<echo>[compile] Using Flex SDK at: ${FLEX_HOME}</echo>
+
+        <mkdir dir="${output.dir}"/>
+
+		<java jar="${FLEX_HOME}/lib/compc.jar" dir="." fork="true" failonerror="true">
+
+			<arg value="+flexlib=${FLEX_HOME}/frameworks" />
+
+			<arg value="-source-path+=${src.dir}" />
+
+            <!-- Include all classes in this path. -->
+            <arg value="-include-sources=${src.dir}" />
+            <arg value="-include-sources=${src.dir}/${package.dir}" />
+            <arg line="-include-file=metadata.xml,'${src.dir}'/metadata.xml" />
+
+            <arg value="-keep-as3-metadata+=Given" />
+            <arg value="-keep-as3-metadata+=When" />
+            <arg value="-keep-as3-metadata+=Then" />
+
+            <arg value="-incremental=true" />
+            <arg value="-verbose-stacktraces=true" />
+            <!--<arg value="-headless-server=true" />-->
+
+			<arg value="-output=${output.swc}" />
+		</java>
+
+        <echo>[compile]${project.title} swc created successfully</echo>
+
+	</target>
+
+	<target name="unittest" >
+
+        <echo>[unittest] Compiling unit tests for ${project.title}</echo>
+
+        <delete dir="${report.dir}" quiet="true" includeEmptyDirs="true"/>
+        <mkdir dir="${report.dir}"/>
+
+		<!-- Compile SWF -->
+		<java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+
+			<arg value="${tests.dir}/${tests.runner}.mxml"/>
+
+			<arg value="-source-path+=${src.dir}"/>
+
+			<arg value="-default-size=1000,800"/>
+			<arg value="-default-background-color=0x000000"/>
+
+			<arg value="-static-link-runtime-shared-libraries=true"/>
+			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
+			<arg value="-library-path+=${libs.dir}"/>
+
+			<arg value="-verbose-stacktraces=true"/>
+			<!--<arg value="-headless-server=true"/>-->
+            <arg value="-incremental=true"/>
+
+            <arg value="-output=${tests.swf}"/>
+		</java>
+
+        <echo>[unittest] Running unit tests for ${project.title}</echo>
+
+        <flexunit swf="${tests.swf}"
+                  todir="${report.dir}"
+                  verbose="true"
+                  localTrusted="true"/>
+
+        <junitreport todir="${report.dir}">
+            <fileset dir="${report.dir}">
+            <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${report.dir}/html"/>
+        </junitreport>
+
+        <echo>[unittest] Finished running Unit Tests for ${project.title}</echo>
+
+	</target>
+
+	<target name="asdoc">
+
+		<echo>[asdoc] Generating ASDOC documentation for ${project.title}</echo>
+
+		<mkdir dir="${docs.dir}"/>
+		<tstamp>
+			<format property="docgen.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+		<java jar="${FLEX_HOME}/lib/asdoc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+			<!--<arg line="-external-library-path+=${libs.dir}"/>-->
+			<arg line="-doc-sources+=${src.dir}/${package.dir}"/>
+			<arg line="-source-path+=${src.dir}"/>
+
+			<arg line="-output ${docs.dir}"/>
+
+			<arg value="-keep-xml=true"/>
+			<arg value="-lenient=true"/>
+            
+			<arg line="-window-title '${project.title} ${version.num} ${version.status}'"/>
+			<arg line="-main-title '${project.title} ${version.num} ${version.status}'"/>
+			<arg line="-footer '${project.title} - Documentation generated at: ${docgen.time}'"/>
+		</java>
+
+		<echo>[asdoc] ASDOC documentation generated successfully for ${project.title}</echo>
+
+	</target>
+
+	<!-- Package the Build -->
+	<target name="package" depends="clean,unittest,compile,asdoc">
+
+        <echo>[package] Packaging ${project.title} Release</echo>
+
+		<tstamp>
+			<format property="touch.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+		<!-- Assemble -->
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/bin"/>
+		<mkdir dir="${dist.dir}/src"/>
+		<mkdir dir="${dist.dir}/test"/>
+		<mkdir dir="${dist.dir}/libs"/>
+        <mkdir dir="${dist.dir}/report"/>
+
+		<copy file="${output.swc}" todir="${dist.dir}/bin"/>
+
+		<copy todir="${dist.dir}/libs">
+			<fileset dir="${libs.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/src">
+			<fileset dir="${src.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/test">
+			<fileset dir="${tests.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/docs">
+			<fileset dir="${docs.dir}"/>
+		</copy>
+        <copy todir="${dist.dir}/report">
+			<fileset dir="${report.dir}"/>
+		</copy>
+
+		<delete dir="${dist.dir}/docs/tempdita"/>
+		<!-- Add ASDoc xml to swc for Flex Builder Tooltips -->
+		<zip destfile="${dist.dir}/bin/${project.name.versioned}.swc" update="true">
+			<zipfileset dir="${docs.dir}/tempdita" prefix="docs">
+				<include name="*packages.dita*"/>
+				<include name="*org.*"/>
+			</zipfileset>
+		</zip>
+
+		<!-- Copy README  -->
+		<copy file="README" tofile="${dist.dir}/README" overwrite="true"/>
+
+        <!--Copy build-->
+        <copy file="cuke4as3lib-build.xml" tofile="${dist.dir}/cuke4as3lib-build.xml" overwrite="true"/>
+        <copy file="cuke4as3lib-build.properties" tofile="${dist.dir}/cuke4as3lib-build.properties" overwrite="true"/>
+
+		<!-- Zip It  -->
+		<zip destfile="${dist.dir}/${project.name.versioned}.zip">
+			<fileset dir="${dist.dir}"/>
+		</zip>
+
+		<!-- Clean Up  -->
+		<delete file="${dist.dir}/${project.name.versioned}.swc"/>
+		<delete file="${dist.dir}/README"/>
+        <delete file="${dist.dir}/cuke4as3lib-build.xml"/>
+        <delete file="${dist.dir}/cuke4as3lib-build.properties"/>
+		<delete dir="${dist.dir}/bin"/>
+		<delete dir="${dist.dir}/src"/>
+		<delete dir="${dist.dir}/test"/>
+		<delete dir="${dist.dir}/libs"/>
+		<delete dir="${dist.dir}/docs"/>
+        <delete dir="${dist.dir}/report"/>
+
+		<echo>[package] Release packaged successfully for ${project.title}</echo>
+
+	</target>
+</project>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+               xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               xmlns:flexui="org.flexunit.flexui.*"
+               width="1000" height="800" creationComplete="onCreationComplete()">
+    <fx:Script>
+		<![CDATA[
+        import com.flashquartermaster.cuke4as3.utilities.BooleanUtil_Test;
+        import com.flashquartermaster.cuke4as3.utilities.StepsBase_Test;
+        import com.flashquartermaster.cuke4as3.utilities.Table_Test;
+
+        import org.flexunit.listeners.CIListener;
+
+        import org.flexunit.runner.FlexUnitCore;
+
+        public function currentRunTestSuite():Array
+        {
+            var testsToRun:Array = new Array();
+
+            testsToRun.push( StepsBase_Test );
+            testsToRun.push( Table_Test );
+            testsToRun.push( BooleanUtil_Test );
+
+            return testsToRun;
+        }
+
+        private function onCreationComplete():void
+        {
+            var core:FlexUnitCore = new FlexUnitCore();
+
+            core.addListener( new CIListener() );
+            core.addListener( uiListener );
+            core.run( currentRunTestSuite(), "Cuke4AS3Lib" );
+        }
+        ]]>
+	</fx:Script>
+
+    <flexui:TestRunnerBase id="uiListener"/>
+
+</s:Application>

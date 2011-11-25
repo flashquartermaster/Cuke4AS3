@@ -1,0 +1,43 @@
+Please refer to the wiki for a getting started guide:
+https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
+
+The DeveloperUI provides an easy way to get started with Cuke4AS3 and creates a visual environment to
+view your application as it runs from your step definitions. It integrates simple savable configuration
+and a view of the compiler and cucumber output for fast feedback when working with Cuke4AS3 on a day to
+day basis in a development environment.
+
+It contains helpful debugging info care of DConsole which is accessible by pressing ctrl + shift + Return.
+
+It also serves as a template for developing your own user interfaces that might do a lot more with the
+outputs from your step definitions e.g. Displaying some telemetry about your applications behavior.
+
+============
+Release Info
+============
+
+Version 0.4.1
+=============
+
+Fixed: Cucumber can send angle brackets as part of its errors and consequently they do not show up in output windows
+Added: Pending steps should be highlighted in yellow
+Fixed: We are exiting on cucumber process complete rather than on client close from the server which is when cucumber says its done
+Fixed: Manage carriage returns on windows to improve formatting
+Fixed: Don't report cli colour highlighting error on windows
+Added: Scroll output as new text is put in
+Added: Show html output at the end of a run in a new window
+
+Version 0.4.0
+=============
+
+Fixed: Formatting goes red if the word "error" is encountered, this is bad if that word is included in a scenario
+Fixed: Developer Installer is badly named it should start with Cuke4AS3 to be easily found in a list of installed applications
+
+Version 0.3.3
+=============
+
+Fixed: Xml formatting does not appear correctly in the output window
+
+Version 0.3.2
+=============
+
+Fixed: Server Errors not being reported

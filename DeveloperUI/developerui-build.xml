@@ -1,0 +1,336 @@
+<!--
+    DeveloperUI
+
+    Usage:
+        $ ant -v -f developerui-build.xml package
+
+    Dependencies:
+    - Ant 1.8.2
+    - Flex 4.5.1
+
+   The goal of this build is to manually test, package the air app and create a native installer
+
+-->
+<project name="DeveloperUI" basedir="." default="package">
+     <!--environment-->
+	<property file="developerui-build.properties"/>
+    <property file="../build.properties" />
+
+    <property name="project.name.versioned" value="${project.name}-${version.num}-${version.status}" />
+
+    <property name="output.swf" value="${output.dir}/${project.name.versioned}.swf" />
+
+    <property name="output.loc" value="${bin.dir}/${project.name.versioned}" />
+    <property name="output.swc" value="${output.loc}.swc" />
+    <property name="output.air" value="${output.loc}.air" />
+    
+	<!--<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />-->
+    <taskdef resource="flexUnitTasks.tasks" classpath="${libs.dir}/flexUnitTasks-4.1.0-33.jar" />
+
+	<target name="clean">
+
+		<echo>[clean] Removing generated folders for ${project.title}</echo>
+
+		<delete dir="${output.dir}" quiet="true" includeEmptyDirs="true"/>
+		<delete dir="${dist.dir}"   quiet="true" includeEmptyDirs="true"/>
+
+        <delete dir="${libs.dir}">
+            <include name="Cuke4AS3*" />
+        </delete>
+
+        <echo>[clean] Folders removed successfully</echo>
+
+	</target>
+
+    <target name="init">
+
+        <echo>[init] Generating folders for ${project.title}</echo>
+
+        <mkdir dir="${output.dir}"/>
+        <mkdir dir="${bin.dir}"/>
+
+        <echo>[init] Folders generated for ${project.title}</echo>
+
+    </target>
+
+    <target name="compile-swf" depends="cuke4As3Swc">
+
+		<echo>[compile-swf] Building ${project.title} swf ${project.name.versioned}</echo>
+		<echo>[compile-swf] Using Flex SDK at: ${FLEX_HOME}</echo>
+
+        <mkdir dir="${output.dir}"/>
+
+        <!--Make a swf for air app-->
+         <java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
+
+            <arg value="+flexlib=${FLEX_HOME}/frameworks" />
+            <arg value="+configname=air" />
+			<arg value="${src.dir}/${project.name}.mxml"/>
+
+			<arg value="-source-path+=${src.dir}"/>
+            <arg value="-library-path+=${libs.dir}"/>
+
+			<arg value="-static-link-runtime-shared-libraries=true"/>
+
+			<arg value="-verbose-stacktraces=true"/>
+			<!--<arg value="-headless-server=true"/>-->
+            <arg value="-incremental=true"/>
+
+            <arg value="-output=${output.swf}" />
+		</java>
+
+        <echo>[compile-swf] ${project.title} swf built successfully</echo>
+
+	</target>
+
+    <target name="make-air" depends="init,generate-certificate,make-package-bundle,compile-swf,create-descriptor">
+
+        <echo>[make-air] Packaging ${project.title} AIR app</echo>
+
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-package"/>
+
+            <arg value="-storetype"/>
+            <arg value="${cert.storetype}"/>
+
+            <arg value="-keystore"/>
+            <arg value="${output.dir}/${cert.keystore}"/>
+
+            <arg value="-storepass" />
+            <arg value="${cert.password}" />
+
+            <arg value="${output.air}"/>
+
+            <arg value="${app.descriptor}"/>
+
+            <arg line="-C ${output.dir} ${project.name.versioned}.swf bundled_libs icons" />
+        </java>
+
+        <echo>[make-air] ${project.title} AIR app packaged successfully </echo>
+
+    </target>
+    
+    <target name="generate-certificate">
+
+        <echo>[generate-certificate] Generating ${project.title} certificate</echo>
+
+        <!--Note: Certficate values derived from main build.properties-->
+        <!--in the parent directory-->
+        
+        <java jar="${ADT.JAR}" fork="true" failonerror="true">
+            <arg value="-certificate" />
+            <arg value="-cn" />
+            <arg value="${cert.name}" />
+            <arg value="-ou" />
+            <arg value="${cert.orgunit}" />
+            <arg value="-o" />
+            <arg value="${cert.orgname}" />
+            <arg value="-c" />
+            <arg value="${cert.country}" />
+            <arg value="${cert.keytype}" />
+            <arg value="${output.dir}/${cert.keystore}" />
+            <arg value="${cert.password}" />
+        </java>
+
+        <echo>[generate-certificate] ${project.title} certificate generated successfully</echo>
+
+    </target>
+
+    <target name="make-package-bundle" depends="cuke4As3Swc">
+
+        <echo>[make-bundledLibs] bundling libs for ${project.title}</echo>
+
+        <mkdir dir="${bundledlibs.dir}" />
+        <mkdir dir="${bundledlibs.dconsole.dir}" />
+        <mkdir dir="${bundledlibs.flexunit.dir}" />
+
+        <!--copy cuke4as3Lib-->
+
+        <copy file="../Cuke4AS3/libs/Cuke4as3Lib-${version.num}-${version.status}.swc"
+              todir="${bundledlibs.dir}"
+              failonerror="true" overwrite="true" />
+
+        <!--copy dconsole-->
+
+        <copy file="${libs.dir}/DConsole2SWC.swc"
+              todir="${bundledlibs.dconsole.dir}"
+              failonerror="true" overwrite="true"/>
+
+        <!--copy flexunit 0.9, 4 and hamcrest this is the standard set from Flash Builder-->
+
+        <copy todir="${bundledlibs.flexunit.dir}" failonerror="true" overwrite="true">
+            <fileset dir="${assets.dir}/flexunit" includes="*"/>
+        </copy>
+
+        <copy todir="${output.dir}/icons" failonerror="true" overwrite="true">
+            <fileset dir="${assets.dir}/icons" includes="*"/>
+        </copy>
+
+        <echo>[make-bundledLibs] ${project.title} libs bundle created</echo>
+
+    </target>
+
+    <target name="create-descriptor">
+
+        <echo>[create-descriptor] Set up ${project.name}-app.xml</echo>
+
+        <copy file="${src.dir}/${project.name}-app.xml" todir="${output.dir}" overwrite="true" failonerror="true"/>
+
+        <replace file="${app.descriptor}"
+                token="[id]" value="${reverse.dns}.${project.name}" />
+
+        <replace file="${app.descriptor}"
+                token="[filename]" value="${project.name.versioned}" />
+
+        <replace file="${app.descriptor}"
+                token="[name]" value="${project.name}" />
+
+        <replace file="${app.descriptor}"
+                token="[versionNumber]" value="${version.num}" />
+
+        <replace file="${app.descriptor}"
+                token="[versionLabel]" value="${version.num} ${version.status}" />
+
+        <replace file="${app.descriptor}"
+                token="[content]"  value="${project.name.versioned}.swf" />
+
+        <replace file="${app.descriptor}"
+                token="[title]" value="${project.name} ${version.num} ${version.status}" />
+
+        <echo>[create-descriptor] ${app.descriptor} sucessfully created</echo>
+
+    </target>
+
+    <target name="create-installer" depends="make-air">
+
+        <echo>[create-installer] Creating ${project.title} installer</echo>
+
+        <!--adt -package -target native "Cuke4AS3 Developer osx.dmg" "Cuke4AS3 Developer.air"-->
+
+        <exec executable="${ADT}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+            <arg value="-package"/>
+            <arg value="-target"/>
+            <arg value="native"/>
+            <arg value="${bin.dir}/${project.name.versioned}.dmg"/>
+            <arg value="${output.air}"/>
+        </exec>
+        <exec executable="${ADT}.bat" failonerror="false" osfamily="windows" failifexecutionfails="true">
+            <arg value="-package"/>
+            <arg value="-target"/>
+            <arg value="native"/>
+            <arg value="${bin.dir}/${project.name.versioned}.exe"/>
+            <arg value="${output.air}"/>
+        </exec>
+
+        <echo>[create-installer] ${project.title} installer successfully created</echo>
+
+    </target>
+
+    <target name="manual-test" depends="init,make-package-bundle,compile-swf,create-descriptor">
+
+        <echo>[manual-test] Run feature files for ${project.title}</echo>
+
+        <exec executable="${ADL}" failonerror="false" osfamily="unix" failifexecutionfails="true">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+        </exec>
+        <exec executable="${ADL}.exe" failonerror="false" osfamily="windows">
+            <arg value="-profile"/>
+            <arg value="extendedDesktop"/>
+            <arg value="${app.descriptor}"/>
+        </exec>
+
+        <!--Clean up after cuke run-->
+        <delete dir="${output.dir}/features" />
+        <delete file="${src.dir}/Cuke4AS3_Config.xml" />
+        <delete file="${src.dir}/cuke4as3_steps.swf" />
+
+        <echo>[manual-test] Feature files successfully run for ${project.title}</echo>
+
+    </target>
+	<!-- Package the Build -->
+	<target name="package" depends="clean,manual-test,make-air,create-installer">
+
+        <echo>[package] Packaging Release for ${project.title}</echo>
+
+		<tstamp>
+			<format property="touch.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+		<!-- Assemble -->
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/bin"/>
+		<mkdir dir="${dist.dir}/src"/>
+		<mkdir dir="${dist.dir}/libs"/>
+
+        <copy todir="${dist.dir}/bin">
+			<fileset dir="${bin.dir}">
+                <exclude name="*.cache" id=""/>
+			</fileset>
+		</copy>
+		<copy todir="${dist.dir}/libs">
+			<fileset dir="${libs.dir}"/>
+		</copy>
+		<copy todir="${dist.dir}/src">
+			<fileset dir="${src.dir}">
+                <exclude name="Hardware*" />
+			</fileset>
+		</copy>
+
+		<!-- Copy README  -->
+		<copy file="README" tofile="${dist.dir}/README" overwrite="true"/>
+
+        <!--Copy build-->
+        <copy file="developerui-build.xml" tofile="${dist.dir}/developerui-build.xml" overwrite="true"/>
+        <copy file="developerui-build.properties" tofile="${dist.dir}/developerui-build.properties" overwrite="true"/>
+
+		<!-- Zip It  -->
+		<zip destfile="${dist.dir}/${project.name.versioned}.zip">
+			<fileset dir="${dist.dir}"/>
+		</zip>
+
+		<!-- Clean Up  -->
+		<delete file="${dist.dir}/${project.name.versioned}.swc"/>
+		<delete file="${dist.dir}/README"/>
+        <delete file="${dist.dir}/developerui-build.xml"/>
+        <delete file="${dist.dir}/developerui-build.properties"/>
+		<delete dir="${dist.dir}/bin"/>
+		<delete dir="${dist.dir}/src"/>
+		<delete dir="${dist.dir}/libs"/>
+
+		<echo>[package] Release packaged successfully for ${project.title}</echo>
+
+	</target>
+
+    <!--Support for using Cuke4AS3 swc-->
+    <target name="cuke4As3Swc" depends="exists-Cuke4as3LibDir,exists-Cuke4as3Swc,compile-Cuke4as3Swc,copy-Cuke4as3Swc"/>
+
+    <target name="exists-Cuke4as3LibDir">
+        <condition property="foundLibDir">
+            <available file="../Cuke4AS3/build/bin"  />
+        </condition>
+    </target>
+
+    <target name="exists-Cuke4as3Swc" if="foundLibDir">
+       <pathconvert property="foundSwc" setonempty="false" pathsep=" " >
+            <path >
+                <fileset dir="../Cuke4AS3/build/bin" includes="Cuke4AS3-${version.num}-${version.status}.swc" />
+            </path>
+        </pathconvert>
+    </target>
+
+    <target name="compile-Cuke4as3Swc" unless="foundSwc">
+        <ant dir="../Cuke4AS3" antfile="cuke4as3-build.xml" target="compile-swc" inheritall="false">
+            <propertyset>
+                <propertyref prefix="build" />
+            </propertyset>
+        </ant>
+    </target>
+
+    <target name="copy-Cuke4as3Swc">
+        <copy todir="${libs.dir}" overwrite="true">
+            <fileset dir="../Cuke4AS3/build/bin" includes="Cuke4AS3-${version.num}-${version.status}.swc" />
+        </copy>
+    </target>
+</project>

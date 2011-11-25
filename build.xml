@@ -1,0 +1,130 @@
+<!--
+    Cuke4AS3
+    
+    Usage:    
+        $ ant -v package
+        
+    Dependencies:
+    - Ant 1.8.2
+    - Flex 4.5.1
+   
+   The goal of this build is compile, unit test, generate asdocs and run cucumber features for
+   Cuke4AS3Lib, Cuke4AS3, Developer UI and Examples
+-->
+<project name="Cuke4AS3" basedir="." default="package">
+
+    <property file="build.properties" />
+
+    <target name="clean">
+
+        <echo>[clean] Removing generated folders for ${project.title}</echo>
+
+        <delete dir="${dist.dir}" quiet="true" includeEmptyDirs="true"/>
+
+        <ant dir="${cuke4as3Lib.dir}" antfile="cuke4as3lib-build.xml" target="clean" inheritall="false" />
+        <ant dir="${cuke4as3.dir}" antfile="cuke4as3-build.xml" target="clean" inheritall="false" />
+        <ant dir="${cuke4as3Ui.dir}" antfile="developerui-build.xml" target="clean" inheritall="false" />
+        <ant dir="${cuke4as3Examples.dir}" antfile="examples-build.xml" target="clean" inheritall="false" />
+
+        <echo>[clean] Folders removed successfully</echo>
+
+    </target>
+
+    <target name="package" depends="clean,Cuke4AS3Lib,Cuke4AS3,DeveloperUI,Examples">
+
+        <!--Test,compile,asdoc and package Cuke4AS3Lib-->
+        <!--Test,compile,asdoc and package Cuke4AS3 wich depends on Cuke4AS3Lib swc-->
+        <!--Use Cuke4AS3 to run self tests-->
+        <!--Test,compile and package Developer UI which depends on Cuke4AS3 swc-->
+        <!--Test,compileand package the examples-->
+
+        <echo>[package] Packaging Release for ${project.title}</echo>
+
+		<tstamp>
+			<format property="touch.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>
+		</tstamp>
+
+		<!-- Assemble -->
+
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.dir}/Cuk4AS3"/>
+		<mkdir dir="${dist.dir}/Cuke4AS3lib"/>
+		<mkdir dir="${dist.dir}/DeveloperUI"/>
+		<mkdir dir="${dist.dir}/Examples"/>
+
+        <copy todir="${dist.dir}/Cuk4AS3">
+			<fileset dir="${cuke4as3.dir}/dist"/>
+		</copy>
+		<copy todir="${dist.dir}/Cuke4AS3lib">
+			<fileset dir="${cuke4as3Lib.dir}/dist"/>
+		</copy>
+		<copy todir="${dist.dir}/DeveloperUI">
+			<fileset dir="${cuke4as3Ui.dir}/dist"/>
+		</copy>
+		<copy todir="${dist.dir}/Examples">
+			<fileset dir="${cuke4as3Examples.dir}/dist"/>
+		</copy>
+
+		<!-- Copy README and LICENSE -->
+		<copy file="README" tofile="${dist.dir}/README" overwrite="true"/>
+        <copy file="LICENSE" tofile="${dist.dir}/LICENSE" overwrite="true"/>
+
+        <!--Copy build-->
+        <copy file="build.xml" tofile="${dist.dir}/build.xml" overwrite="true"/>
+        <copy file="build.properties" tofile="${dist.dir}/build.properties" overwrite="true"/>
+
+		<!-- Zip It  -->
+		<zip destfile="${dist.dir}/${project.name.versioned}.zip">
+			<fileset dir="${dist.dir}"/>
+		</zip>
+
+		<!-- Clean Up  -->
+        <delete dir="${dist.dir}/Cuk4AS3" />
+		<delete dir="${dist.dir}/Cuke4AS3lib" />
+		<delete dir="${dist.dir}/DeveloperUI" />
+		<delete dir="${dist.dir}/Examples"/>
+        <delete file="${dist.dir}/README" />
+        <delete file="${dist.dir}/LICENSE" />
+        <delete file="${dist.dir}/build.xml" />
+        <delete file="${dist.dir}/build.properties" />
+
+		<echo>[package] Release packaged successfully for ${project.title}</echo>
+    </target>
+
+    <!-- Builds Cuke4AS3Lib -->
+    <target name="Cuke4AS3Lib">
+      <ant dir="${cuke4as3Lib.dir}" antfile="cuke4as3lib-build.xml" target="package" inheritall="false">
+         <propertyset>
+            <propertyref prefix="build" />
+         </propertyset>
+      </ant>
+    </target>
+
+    <!-- Builds Cuke4AS3 -->
+    <target name="Cuke4AS3">
+      <ant dir="${cuke4as3.dir}" antfile="cuke4as3-build.xml" target="package" inheritall="false">
+         <propertyset>
+            <propertyref prefix="build" />
+         </propertyset>
+      </ant>
+    </target>
+
+    <!-- Builds Developer UI -->
+    <target name="DeveloperUI">
+      <ant dir="${cuke4as3Ui.dir}" antfile="developerui-build.xml" target="package" inheritall="false">
+         <propertyset>
+            <propertyref prefix="build" />
+         </propertyset>
+      </ant>
+    </target>
+
+    <!-- Builds Examples -->
+    <target name="Examples">
+      <ant dir="${cuke4as3Examples.dir}" antfile="examples-build.xml" target="package" inheritall="false">
+         <propertyset>
+            <propertyref prefix="build" />
+         </propertyset>
+      </ant>
+    </target>
+
+</project>

@@ -1,0 +1,17 @@
+Cuke4AS3Lib is a support library for writing step definitions comprising
+support for Booleans, tables, Pending notifications, a base class for
+step definitions and fairly dodgy ide metadata annotation
+
+============
+Release Info
+============
+
+Version 0.3.3
+=============
+
+Added: Pending support
+
+Version 0.3.2
+=============
+
+Table support for tables where the headers are the first column in the table

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+                       xmlns:s="library://ns.adobe.com/flex/spark"
+                       xmlns:mx="library://ns.adobe.com/flex/mx"
+                       xmlns:flexui="org.flexunit.flexui.*"
+                       width="1000" height="800" creationComplete="onCreationComplete()">
+    <fx:Script>
+		<![CDATA[
+        import com.flashquartermaster.cuke4as3.Cuke4AS3_Test;
+        import com.flashquartermaster.cuke4as3.events.InvokeMethodEvent_Test;
+        import com.flashquartermaster.cuke4as3.events.ProcessedCommandEvent_Test;
+        import com.flashquartermaster.cuke4as3.filesystem.WireFileParser_Test;
+        import com.flashquartermaster.cuke4as3.net.BinarySwfLoader_Test;
+        import com.flashquartermaster.cuke4as3.net.CommandProcessor_Test;
+        import com.flashquartermaster.cuke4as3.net.Cucumber_Test;
+        import com.flashquartermaster.cuke4as3.net.Cuke4AS3Server_Test;
+        import com.flashquartermaster.cuke4as3.process.CompilerProcess_Test;
+        import com.flashquartermaster.cuke4as3.process.CucumberArgsValidator_Test;
+        import com.flashquartermaster.cuke4as3.process.CucumberProcess_Test;
+        import com.flashquartermaster.cuke4as3.process.Process_Test;
+        import com.flashquartermaster.cuke4as3.reflection.StepInvoker_Test;
+        import com.flashquartermaster.cuke4as3.reflection.StepMatcher_Test;
+        import com.flashquartermaster.cuke4as3.reflection.SwfProcessor_Test;
+        import com.flashquartermaster.cuke4as3.support.flexunit.MethodInvokationAsyncStatement_Test;
+        import com.flashquartermaster.cuke4as3.utils.CucumberMessageMaker_Test;
+        import com.flashquartermaster.cuke4as3.utils.StringUtilities_Test;
+        import com.flashquartermaster.cuke4as3.vo.InvokeArgumentsProcessor_Test;
+        import com.flashquartermaster.cuke4as3.vo.InvokeInfo_Test;
+        import com.flashquartermaster.cuke4as3.vo.MatchInfo_Test;
+        import com.flashquartermaster.cuke4as3.vo.ServerInfo_Test;
+
+        import org.flexunit.listeners.CIListener;
+        import org.flexunit.runner.FlexUnitCore;
+
+        public function currentRunTestSuite():Array
+        {
+            var testsToRun:Array = new Array();
+
+//            default
+            testsToRun.push( Cuke4AS3_Test );
+//            events
+            testsToRun.push( InvokeMethodEvent_Test );
+            testsToRun.push( ProcessedCommandEvent_Test );
+//            filesystem
+            testsToRun.push( WireFileParser_Test );
+//            net
+            testsToRun.push( BinarySwfLoader_Test );
+            testsToRun.push( Cucumber_Test );
+            testsToRun.push( Cuke4AS3Server_Test );
+            testsToRun.push( CommandProcessor_Test );
+//            process
+            testsToRun.push( CompilerProcess_Test );
+            testsToRun.push( CucumberProcess_Test );
+            testsToRun.push( Process_Test );
+            testsToRun.push( CucumberArgsValidator_Test );
+//            reflection
+            testsToRun.push( StepInvoker_Test );
+            testsToRun.push( StepMatcher_Test );
+            testsToRun.push( SwfProcessor_Test );
+//            support
+//            flexunit
+            testsToRun.push( MethodInvokationAsyncStatement_Test );
+//            utils
+            testsToRun.push( CucumberMessageMaker_Test );
+            testsToRun.push( StringUtilities_Test );
+//            vo
+            testsToRun.push( InvokeArgumentsProcessor_Test );
+            testsToRun.push( ServerInfo_Test );
+            testsToRun.push( MatchInfo_Test );
+            testsToRun.push( InvokeInfo_Test );
+
+            return testsToRun;
+        }
+
+        private function onCreationComplete():void
+        {
+            var core:FlexUnitCore = new FlexUnitCore();
+
+            core.addListener( new CIListener() );
+            core.addListener( uiListener );
+            core.run( currentRunTestSuite(), "Cuke4AS3Specs" );
+        }
+        ]]>
+	</fx:Script>
+
+    <flexui:TestRunnerBase id="uiListener"/>
+
+</s:WindowedApplication>

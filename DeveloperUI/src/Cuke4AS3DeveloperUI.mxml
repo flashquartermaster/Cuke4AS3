@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="1024" height="786"
+					   creationComplete="onCreationComplete(event)">
+
+	<fx:Declarations>
+    </fx:Declarations>
+
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		mx|TextArea 
+		{
+			contentBackgroundColor : #000000;
+		}
+	</fx:Style>
+	<fx:Script>
+		<![CDATA[
+        import com.flashquartermaster.cuke4as3.Config;
+        import com.flashquartermaster.cuke4as3.Cuke4AS3;
+        import com.flashquartermaster.cuke4as3.logging.DebugConsole;
+        import com.flashquartermaster.cuke4as3.process.Process;
+        import com.furusystems.dconsole2.DConsole;
+
+        import flash.html.HTMLLoader;
+
+        import mx.controls.Alert;
+
+        import mx.controls.Alert;
+        import mx.core.FlexHTMLLoader;
+        import mx.events.FlexEvent;
+
+        private var cuke4AS3:Cuke4AS3;
+        private var debugConsole:DebugConsole;
+        private var so:SharedObject;
+
+        private var _htmlFilePath:String;
+
+        protected function onCreationComplete( event:FlexEvent ):void
+        {
+            so = SharedObject.getLocal( "Cuke4AS3Developer" );
+
+            if( so.data.srcDir != undefined )
+            {
+                srcDir_ti.text = so.data.srcDir;
+                mxmlPath_ti.text = so.data.mxmlcPath;
+                cucumberPath_ti.text = so.data.cucumberPath;
+                mxmlCompilerArgs_ta.text = so.data.mxmlcArgs;
+                cucumberArgs_ta.text = so.data.cucumberArgs;
+            }
+
+            cuke4AS3 = new Cuke4AS3( true );
+            cuke4AS3.addEventListener( ErrorEvent.ERROR, onCuke4AS3Error );
+            cuke4AS3.init();
+
+            //Irrelevant for our perposes
+//			cuke4AS3.compilerProcess.addEventListener( Event.COMPLETE, onCompilerProcessComplete );
+            //For output formatting
+            cuke4AS3.compilerProcess.addEventListener( Process.SHELL_DATA_EVENT, onCompilerShellData );
+            cuke4AS3.compilerProcess.addEventListener( Process.SHELL_ERROR_EVENT, onCompilerShellError );
+            //Manipulates UI and shows errors
+            cuke4AS3.compilerProcess.addEventListener( Process.PROCESS_ERROR_EVENT, onCompilerProcessError );
+
+            ///Irrelevant for our perposes
+//			cuke4AS3.swfLoader.addEventListener( Event.COMPLETE, onSwfLoaderComplete );
+            //Show Error
+            cuke4AS3.swfLoader.addEventListener( ErrorEvent.ERROR, onSwfLoaderError );
+            cuke4AS3.swfLoader.addEventListener( SecurityErrorEvent.SECURITY_ERROR, onSwfLoaderError );//Comes from UrlLoader
+            cuke4AS3.swfLoader.addEventListener( IOErrorEvent.IO_ERROR, onSwfLoaderError );//Can come from UrlLoader or Loader
+
+            //Irrelevant for our perposes
+//		    cuke4AS3.swfProcessor.addEventListener( Event.COMPLETE, onSwfProcessorComplete );
+            //Show Error
+            cuke4AS3.swfProcessor.addEventListener( ErrorEvent.ERROR, onSwfProcessorError );
+
+            //Irrelevant
+            cuke4AS3.cuke4AS3Server.addEventListener( Event.COMPLETE, onServerRunning );
+            //Show Error
+            cuke4AS3.cuke4AS3Server.addEventListener( ErrorEvent.ERROR, onServerError );
+
+            cuke4AS3.cucumberProcess.addEventListener( Event.COMPLETE, onCucumberProcessComplete );
+            // We are all done running processes so whenm this one fires we just have to wait for cucumber
+            // to close the connection with the server to be sure we are done.
+            // This can be achieved by listening to
+            // cuke4AS3.cuke4AS3Server.server.addEventListener( ServerSocketConnectEvent.CONNECT, onCucumberConnect );
+            // then listening to
+            // cuke4AS3.cuke4AS3Server.cucumber.socket.addEventListener( Event.CLOSE, onCucumberClientClose );
+            // as shown in  onServerRunning
+
+            //For output formatting
+            cuke4AS3.cucumberProcess.addEventListener( Process.SHELL_DATA_EVENT, onCucumberShellData );
+            cuke4AS3.cucumberProcess.addEventListener( Process.SHELL_ERROR_EVENT, onCucumberShellError );
+            //Manipulate UI  and show errors
+            cuke4AS3.cucumberProcess.addEventListener( Process.PROCESS_ERROR_EVENT, onCucumberProcessError );
+
+            //Unnecessary as this is the default but its here because the checkboxes are default selected
+            cuke4AS3.compilerProcess.isUseBundledDConsole = true;
+            cuke4AS3.compilerProcess.isUseBundledFlexUnit = true;
+
+            //Auto select output
+            tn.selectedIndex = 1;
+        }
+
+        //Info from Cuke4AS3
+
+        protected function onCuke4AS3Error( event:ErrorEvent ):void
+        {
+            stop();
+            Alert.show( event.text, "Cuke4AS3 Error" );
+
+//				switch( event.errorID )
+//				{
+//					//Cuke4AS3 Error
+//					case Config.CUKE_CANNOT_RUN_ERROR:
+//						stop();
+//						Alert.show( event.text, "Cuke4AS3 Error");
+//						break;
+//					case Config.CUKE_NO_WIRE_FILE:
+//						stop();
+//						Alert.show( event.text, "Cuke4AS3 Error");
+//						break;
+//					case Config.SERVER_CANNOT_RUN_ERROR:
+//						stop();
+//						Alert.show( event.text, "Cuke4AS3 Error");
+//						break;
+//					default://Just in case
+//						stop();
+//						Alert.show( event.text, "Cuke4AS3 Error");
+//						break;
+//				}
+        }
+
+        //Run/stop
+
+        private function run( event:Event = null ):void
+        {
+
+            if( tn.selectedIndex != 1 )
+            {
+                tn.selectedIndex = 1;
+            }
+
+            run_but.enabled = false;
+            stop_but.enabled = true;
+
+            compiler_out_ta.htmlText = "";
+            cucumber_out_ta.htmlText = "";
+
+            compilerOutput.percentHeight = 20;
+            cucumberOutput.percentHeight = 80;
+
+            cuke4AS3.srcDir = srcDir_ti.text;
+            cuke4AS3.mxmlcPath = mxmlPath_ti.text;
+            cuke4AS3.cucumberPath = cucumberPath_ti.text;
+            cuke4AS3.mxmlcArgs = mxmlCompilerArgs_ta.text;
+            cuke4AS3.cucumberArgs = cucumberArgs_ta.text;
+
+            cuke4AS3.run();
+        }
+
+        private function stop( event:Event = null ):void
+        {
+            cuke4AS3.stop();
+            run_but.enabled = true;
+            stop_but.enabled = false;
+        }
+
+        //Manage config and shared object
+
+        private function save_config_but_clickHandler( event:MouseEvent ):void
+        {
+            save_config_ta.text = "";
+
+            so.data.srcDir = srcDir_ti.text;
+            so.data.mxmlcPath = mxmlPath_ti.text;
+            so.data.cucumberPath = cucumberPath_ti.text;
+            so.data.mxmlcArgs = mxmlCompilerArgs_ta.text;
+            so.data.cucumberArgs = cucumberArgs_ta.text;
+
+            var flushStatus:String = null;
+
+            try
+            {
+                flushStatus = so.flush( 10000 );
+            }
+            catch( error:Error )
+            {
+                save_config_ta.text += "Error...Could not write SharedObject to disk\n";
+            }
+
+            if( flushStatus != null )
+            {
+                switch( flushStatus )
+                {
+                    case SharedObjectFlushStatus.PENDING:
+                        save_config_ta.text += "Requesting permission to save object...\n";
+                        so.addEventListener( NetStatusEvent.NET_STATUS, onFlushStatus );
+                        break;
+                    case SharedObjectFlushStatus.FLUSHED:
+                        save_config_ta.text += "Config saved.\n";
+                        break;
+                }
+            }
+        }
+
+        private function onFlushStatus( event:NetStatusEvent ):void
+        {
+            save_config_ta.text += "User closed permission dialog...\n";
+
+            switch( event.info.code )
+            {
+                case "SharedObject.Flush.Success":
+                    save_config_ta.text += "Permission granted -- values saved\n.";
+                    break;
+                case "SharedObject.Flush.Failed":
+                    save_config_ta.text += "Permission denied -- values not saved.\n";
+                    break;
+            }
+
+            so.removeEventListener( NetStatusEvent.NET_STATUS, onFlushStatus );
+        }
+
+        //Info from compiler process
+
+        protected function onCompilerShellData( event:TextEvent ):void
+        {
+            compiler_out_ta.htmlText += "<font color=\"#00FF00\">" + manageCoreFormatting( event.text ) + "</font>";
+        }
+
+        protected function onCompilerShellError( event:TextEvent ):void
+        {
+            var text:String = manageCoreFormatting( event.text );
+
+            var color:String = text.indexOf( "Warning:" ) != -1 ? "#FF7F00" : "#FF0000";
+            compiler_out_ta.htmlText += "<font color=\"" + color + "\">" + text + "</font>";
+        }
+
+        protected function onCompilerProcessComplete( event:Event ):void
+        {
+            //Do nothing right now
+        }
+
+        protected function onCompilerProcessError( event:ErrorEvent ):void
+        {
+            run_but.enabled = true;
+            stop_but.enabled = false;
+            compilerOutput.percentHeight = 80;
+            cucumberOutput.percentHeight = 20;
+            visualMode_cb.selected = false;
+            manageVisualMode();
+
+            manageProcessErrors( event );
+        }
+
+        //Info from cucumber process
+
+        protected function onCucumberShellData( event:TextEvent ):void
+        {
+//				var pattern:RegExp = /<(\w.*?|\d.*?)>/g;//[\d\.]+
+//				var ret:Object = pattern.exec( event.text );
+            //<(.*?)>
+            var text:String = manageCoreFormatting( event.text );
+            var color:String = "#00FF00";
+
+            if( text.indexOf( "Error from" ) != -1 )
+            {
+                color = "#FF0000"
+            }
+            else if( text.indexOf( "Cucumber::Pending" ) != -1 )
+            {
+                color = "#FFD700";
+            }
+
+            cucumber_out_ta.htmlText += "<font color=\"" + color + "\">" + text + "</font>";
+            scrollCucumberOutputWindow();
+        }
+
+        protected function onCucumberShellError( event:TextEvent ):void
+        {
+            var text:String = event.text;
+
+            if( text.indexOf( "ANSICON" ) == -1 )//Don't display windows highlighting error
+            {
+                cucumber_out_ta.htmlText += "<font color=\"#FF0000\">" + manageCoreFormatting( text ) + "</font>";
+                scrollCucumberOutputWindow();
+            }
+        }
+
+        protected function onCucumberProcessComplete( event:Event ):void
+        {
+            openHtmlOutput();
+        }
+
+        protected function onCucumberProcessError( event:ErrorEvent ):void
+        {
+            openHtmlOutput();
+
+            run_but.enabled = true;
+            stop_but.enabled = false;
+            compilerOutput.percentHeight = 20;
+            cucumberOutput.percentHeight = 80;
+            visualMode_cb.selected = false;
+            manageVisualMode();
+
+            manageProcessErrors( event );
+        }
+
+        private function manageProcessErrors( event:ErrorEvent ):void
+        {
+            switch( event.errorID )
+            {
+                case Config.SHELL_EXIT_UNKNOWN_EXIT_CODE:
+                    stop();
+                    Alert.show( event.text, "Cuke4AS3 Error" );
+                    break;
+                case Config.VALIDATION_ERROR:
+                    stop();
+                    Alert.show( event.text, "Cuke4AS3 Error" );
+                    break;
+//					case Process.FORCED_SHELL_EXIT:
+//						break;
+//					case Process.SHELL_EXIT_WITH_ERRORS:
+//						break;
+//					case CompilerProcess.COMPILE_ERRORS:
+//						//event.text "(\d+)" amount of errors
+//						break;
+                default:
+                    break;
+            }
+        }
+
+        //Info from swf loader
+
+        protected function onSwfLoaderError( event:ErrorEvent ):void
+        {
+            //SwfProcessor errors are ErrorEvent, IOErrorEvent and SecurityErrorEvent
+            stop();
+            Alert.show( event.text, "Cuke4AS3 Error" );
+        }
+
+        protected function onSwfLoaderComplete( event:Event ):void
+        {
+            //Do nothing right now
+        }
+
+        //Info from the swf processor
+
+        protected function onSwfProcessorError( event:ErrorEvent ):void
+        {
+            stop();
+            Alert.show( event.text, "Cuke4AS3 Error" );
+        }
+
+        protected function onSwfProcessorComplete( event:Event ):void
+        {
+            //This will only tell us that the server will now be run
+        }
+
+        //Info from the server
+
+        protected function onServerError( event:ErrorEvent ):void
+        {
+            stop();
+            Alert.show( event.text, "Cuke4AS3 Error" );
+        }
+
+        protected function onServerRunning( event:Event ):void
+        {
+            cuke4AS3.cuke4AS3Server.server.addEventListener( ServerSocketConnectEvent.CONNECT, onCucumberConnect );
+        }
+
+        private function onCucumberConnect( event:ServerSocketConnectEvent ):void
+        {
+            cuke4AS3.cuke4AS3Server.cucumber.socket.addEventListener( Event.CLOSE, onCucumberClientClose );
+        }
+
+        private function onCucumberClientClose( event:Event ):void
+        {
+            run_but.enabled = true;
+            stop_but.enabled = false;
+            compilerOutput.percentHeight = 20;
+            cucumberOutput.percentHeight = 80;
+
+            scrollCucumberOutputWindow();
+        }
+
+        //Browsing and selecting items
+
+        protected function source_browse_but_clickHandler( event:MouseEvent ):void
+        {
+            var file:File = new File();
+            file.browseForDirectory( "Select Directory" );
+            file.addEventListener( Event.SELECT, sourceDirectorySelected );
+        }
+
+        protected function sourceDirectorySelected( event:Event ):void
+        {
+            var file:File = ( event.target as File );
+            srcDir_ti.text = file.nativePath;
+        }
+
+        protected function mxmlc_browse_but_clickHandler( event:MouseEvent ):void
+        {
+            var file:File = File.applicationDirectory;
+            file.browseForOpen( "Select mxmlc executable" );
+            file.addEventListener( Event.SELECT, mxmlcFileSelected );
+        }
+
+        protected function mxmlcFileSelected( event:Event ):void
+        {
+            var file:File = ( event.target as File );
+            mxmlPath_ti.text = file.nativePath;
+        }
+
+        protected function cucumber_browse_but_clickHandler( event:MouseEvent ):void
+        {
+            var file:File = File.applicationDirectory;
+            file.browseForOpen( "Select Cucumber executable" );
+            file.addEventListener( Event.SELECT, cucumberFileSelected );
+        }
+
+        protected function cucumberFileSelected( event:Event ):void
+        {
+            var file:File = ( event.target as File );
+            cucumberPath_ti.text = file.nativePath;
+        }
+
+        //Ui Visual test Environment
+
+        protected function manageVisualMode( event:MouseEvent = null ):void
+        {
+            if( visualMode_cb.selected )
+            {
+                tn.selectedIndex = 1;
+                uiTestEnvironmentWrapper.percentWidth = 100;
+                uiOutput.percentWidth = 50;
+                uiTestEnvironmentWrapper.visible = true;
+            }
+            else
+            {
+                uiTestEnvironmentWrapper.percentWidth = 0;
+                uiOutput.percentWidth = 100;
+                uiTestEnvironmentWrapper.visible = false;
+            }
+        }
+
+        protected function onUiTestEnvironmentWrapper( event:FlexEvent ):void
+        {
+            cuke4AS3.visualTestEnvironment = uiTestEnvironment;
+            manageVisualMode();
+        }
+
+        //Doomsday console
+
+        protected function onDebugConsoleUIComplete( event:FlexEvent ):void
+        {
+            debugConsole = new DebugConsole();
+            debugConsoleUI.addChild( debugConsole );
+        }
+
+        //Misc UI Events
+
+        private function manageServerOnlyMode( event:MouseEvent ):void
+        {
+            //TODO
+        }
+
+        protected function useConfig( event:MouseEvent ):void
+        {
+//				if(useConfig_cb.selected) {
+//					mxmlCompilerArgs_ta.text = "--load-config '" + srcDir_ti.text + File.separator + Config.COMPILER_CONFIG + "'";
+//				} 
+        }
+
+        protected function useFlexUnit( event:MouseEvent ):void
+        {
+            cuke4AS3.compilerProcess.isUseBundledFlexUnit = useFlexunit_cb.selected;
+        }
+
+        protected function useDConsole( event:MouseEvent ):void
+        {
+            cuke4AS3.compilerProcess.isUseBundledDConsole = useDConsole_cb.selected;
+        }
+
+        private function scrollCucumberOutputWindow():void
+        {
+            cucumber_out_ta.verticalScrollPosition = cucumber_out_ta.maxVerticalScrollPosition;
+        }
+
+        private function manageCoreFormatting( text:String ):String
+        {
+            text = text.replace( /<(.*?)>/gm, "&lt;$1&gt;" );
+            text = text.replace( /\r/g, "" );//Strip carriage returns on windows
+            return text
+        }
+
+        private function openHtmlOutput():void
+        {
+            _htmlFilePath = cuke4AS3.cucumberProcess.argValidator.htmlFilePath;
+
+            if( _htmlFilePath != null )
+            {
+                var options:NativeWindowInitOptions = new NativeWindowInitOptions();
+                options.owner = this.nativeWindow;
+
+                var bounds:Rectangle = new Rectangle( this.nativeWindow.x + 130,
+                        this.nativeWindow.y + 90, this.nativeWindow.width - 100,
+                        this.nativeWindow.height - 150 );
+
+                var htmlLoader:HTMLLoader = HTMLLoader.createRootWindow( true, null, true, bounds );
+                htmlLoader.load( new URLRequest( "file://" + _htmlFilePath ) );
+            }
+        }
+        ]]>
+	</fx:Script>
+	
+	<s:Panel title="Cuke4AS3 Developer" width="100%" height="100%" color="0x000000" borderAlpha="0.15">
+		
+		<s:layout>
+			<s:VerticalLayout paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"/>
+		</s:layout>
+
+		<s:HGroup>
+			<s:Button id="run_but" label="Run" click="run(event);"/>
+			<s:CheckBox id="visualMode_cb" label="Visual Mode" click="manageVisualMode(event);"/>
+			<s:Button id="stop_but" label="Stop" click="stop(event);" enabled="false"/>
+		</s:HGroup>
+		<mx:TabNavigator id="tn"  width="100%" height="100%" color="0x323232">
+			
+			<s:NavigatorContent label="Config">
+				
+				<s:VGroup width="100%">
+					
+					<s:HGroup width="100%">
+						<s:Label width="70" text="Source"/>
+						<s:TextInput id="srcDir_ti" width="60%" text=""/>
+						<s:Button id="source_browse_but" label="Browse" click="source_browse_but_clickHandler(event)"/>
+					</s:HGroup>
+					
+					<s:Spacer height="10"/>
+					
+					<s:HGroup width="100%">
+						<s:Label width="70" text="Mxmlc"/>
+						<s:TextInput id="mxmlPath_ti" width="60%" text=""/>
+						<s:Button id="mxmlc_browse_but" label="Browse" click="mxmlc_browse_but_clickHandler(event)"/>
+					</s:HGroup>
+					
+					<s:VGroup width="100%">
+						<s:HGroup width="100%">
+							<s:Label width="70" text="Mxmlc Compiler Arguments"/>
+							<s:TextArea id="mxmlCompilerArgs_ta" width="60%" height="60" text="" />
+						</s:HGroup>
+						<s:HGroup>
+							<s:Label width="70" text="Use Bundled Libraries" />
+							<s:CheckBox id="useFlexunit_cb" label="FlexUnit" click="useFlexUnit(event)" selected="true"/>
+							<s:CheckBox id="useDConsole_cb" label="DConsole" click="useDConsole(event)" selected="true"/>
+							<!--<s:CheckBox id="useConfig_cb" label="Use Last Config" click="useConfig(event)"/>-->
+						</s:HGroup>
+					</s:VGroup>
+					
+					
+					<s:Spacer height="10" />
+					
+					<s:HGroup width="100%">
+						<s:Label width="70" text="Cucumber"/>
+						<s:TextInput id="cucumberPath_ti" width="60%" text=""/>
+						<s:Button id="cucumber_browse_but" label="Browse" click="cucumber_browse_but_clickHandler(event)"/>
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Label width="70" text="Cucumber Arguments"/>
+						<s:TextArea id="cucumberArgs_ta" width="60%" height="60" text="" />
+					</s:HGroup>
+					
+					<s:Spacer height="10" />
+					
+					<s:HGroup width="100%">
+						<s:Label width="70" text="Save Config" />
+						
+						<s:VGroup width="100%">
+							<s:TextArea id="save_config_ta" width="600" height="60" text="" />
+							<s:Button id="save_config_but" label="Save Config" click="save_config_but_clickHandler(event)"	/> 
+						</s:VGroup>
+						
+					</s:HGroup>
+					
+					<s:Spacer height="10" />
+					
+					<s:HGroup width="100%" >
+						
+						<s:Label width="70" text="Server Mode" />
+						<s:CheckBox id="serverOnlyMode_cb" label="Run as server only" click="manageServerOnlyMode(event);" enabled="false"/>
+						
+					</s:HGroup>
+					
+				</s:VGroup>
+				
+			</s:NavigatorContent>
+				
+			<s:NavigatorContent label="Output">
+					
+					<mx:HDividedBox width="100%" height="100%">
+						
+						<mx:Canvas id="uiOutput" width="100%" height="100%">
+							
+							<mx:VDividedBox width="100%" height="100%">
+								
+								<mx:Canvas id="compilerOutput" width="100%" height="20%">
+									<s:VGroup width="100%" height="100%">
+										<s:Label text="Compiler Output" />
+										<mx:TextArea id="compiler_out_ta" width="100%" height="100%"/>
+									</s:VGroup>
+								</mx:Canvas>
+								
+								<mx:Canvas id="cucumberOutput" width="100%" height="80%">
+									<s:VGroup width="100%" height="100%">
+										<s:Label text="Cucumber Output" />
+										<mx:TextArea id="cucumber_out_ta" width="100%" height="100%"/>
+									</s:VGroup>
+								</mx:Canvas>
+								
+							</mx:VDividedBox>
+						</mx:Canvas>
+						
+						<mx:Canvas id="uiTestEnvironmentWrapper" width="100%" height="100%" creationComplete="onUiTestEnvironmentWrapper( event );">
+							<mx:UIComponent id="uiTestEnvironment" width="100%" height="100%" />
+						</mx:Canvas>
+				
+					</mx:HDividedBox>
+				
+			</s:NavigatorContent>
+			
+		</mx:TabNavigator>
+		
+		
+	</s:Panel>
+	
+	<mx:UIComponent id="debugConsoleUI" x="0" y="0" width="{this.width}" height="{this.height}" creationComplete="onDebugConsoleUIComplete( event);"/>
+	
+</s:WindowedApplication>
