@@ -61,14 +61,15 @@ package features.step_definitions
 			if( button == "divide" )
 			{
 				_calculatorResult = _calculator.divide();
-				return;
 			}
 			else if( button == "add" )
 			{
 				_calculatorResult = _calculator.add();
-				return;
 			}
-			throw new Error("Unknown operation : " + button);
+            else
+            {
+                throw new Error("Unknown operation : " + button);
+            }
 		}
 		
 		[Then(/^the current value should be (.*)$/)]
