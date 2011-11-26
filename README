@@ -1,4 +1,4 @@
-Cuke4AS3 Developer is a alpha/protoype to allow actionscript to be used for cucumber step definitions
+Cuke4AS3 Developer allows ActionScript to be used for Cucumber step definitions
 
 Wiki Home:
 https://github.com/flashquartermaster/Cuke4AS3/wiki
@@ -8,6 +8,12 @@ https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
 
 Important info on how to work with the source code:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/Working-With-The-Source
+
+Cuke4AS3Lib Documenation:
+http://flashquartermaster.com/cuke4as3/lib/docs/
+
+Cuke4AS3 Documenation:
+http://flashquartermaster.com/cuke4as3/core/docs/
 
 Please Note:
 No contributions will be accepted unless they have accompanying unit tests and where necessary features and step definitions
