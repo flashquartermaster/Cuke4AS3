@@ -102,6 +102,9 @@
 
             //Auto select output
             tn.selectedIndex = 1;
+
+            //Use key listener for <enter> key to run
+            systemManager.stage.addEventListener( KeyboardEvent.KEY_DOWN, onKeyDown );
         }
 
         //Info from Cuke4AS3
@@ -512,6 +515,14 @@
 
                 var htmlLoader:HTMLLoader = HTMLLoader.createRootWindow( true, null, true, bounds );
                 htmlLoader.load( new URLRequest( "file://" + _htmlFilePath ) );
+            }
+        }
+
+        private function onKeyDown( event:KeyboardEvent ):void
+        {
+            if (event.keyCode == Keyboard.ENTER)
+            {
+                run();
             }
         }
         ]]>
