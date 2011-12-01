@@ -58,8 +58,9 @@
                 src="${calculator.src.dir}"
                 libs="${calculator.libs.dir}"
                 cucumberArgs="-f html -o ${reports.dir}/calculator-report.html -f junit -o ${reports.dir}"
-                ruby="${RUBY}"
-                cucumber="${CUCUMBER}"
+                ruby="${RUBY_EXE}"
+                cucumberNix="${CUCUMBER_NIX}"
+                cucumberExe="${CUCUMBER_EXE}"
                 />
 
         <junitreport todir="${reports.dir}">
@@ -91,8 +92,9 @@
                 <!--src="${selenium.src.dir}"-->
                 <!--libs="${selenium.libs.dir}"-->
                 <!--cucumberArgs="-f html -o ${reports.dir}/selenium-report.html -f junit -o ${reports.dir}"-->
-                <!--ruby="${RUBY}"-->
-                <!--cucumber="${CUCUMBER}"-->
+                <!--ruby="${RUBY_EXE}"-->
+                <!--cucumber_nix="${CUCUMBER_NIX}"-->
+                <!--cucumber_exe="${CUCUMBER_EXE}"-->
                 <!--/>-->
 
         <!--&lt;!&ndash;Stop selenium&ndash;&gt;-->
@@ -217,9 +219,10 @@
         <attribute name="descriptor" />
         <attribute name="src"/>
         <attribute name="libs"/>
-        <attribute name="cucumberArgs"/>
+        <attribute name="cucumberNix"/>
         <attribute name="ruby"/>
-        <attribute name="cucumber"/>
+        <attribute name="cucumberExe"/>
+        <attribute name="cucumberArgs"/>
 
         <sequential>
             <echo>SDK: @{sdk}</echo>
@@ -227,9 +230,10 @@
             <echo>Descriptor: @{descriptor}</echo>
             <echo>Source Directory: @{src}</echo>
             <echo>Libs Directory: @{libs}</echo>
-            <echo>Html Output Directory: @{htmloutput}</echo>
             <echo>Ruby exe: @{ruby}</echo>
-            <echo>Cucumber exe: @{cucumber}</echo>
+            <echo>Cucumber exe: @{cucumberExe}</echo>
+            <echo>Cucumber *nix: @{cucumberNix}</echo>
+            <echo>Cucumber args: @{cucumberArgs}</echo>
 
             <exec executable="@{adl}" failonerror="false" osfamily="unix" failifexecutionfails="true">
                 <arg value="-profile"/>
@@ -246,7 +250,7 @@
                 <arg value="'-compiler.library-path '@{libs}''" />
 
                 <arg value="-cucumber" />
-                <arg value="/usr/bin/cucumber" />
+                <arg value="@{cucumberNix}" />
                 <arg value="-cucumberArgs" />
                 <arg value="'@{cucumberArgs}'" />
 
@@ -270,7 +274,7 @@
                 <arg value="-cucumber" />
                 <arg value="@{ruby}" />
                 <arg value="-cucumberArgs" />
-                <arg value="'@{cucumberArgs}'" />
+                <arg value="'@{cucumberExe} @{cucumberArgs}'" />
 
                 <arg value="-headless" />
                 <arg value="true" />

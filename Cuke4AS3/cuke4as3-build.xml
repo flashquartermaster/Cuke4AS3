@@ -243,13 +243,13 @@
 
         <echo>[create-installer] Creating ${project.title} installer</echo>
 
-        <!--adt -package -target native "Cuke4AS3 Developer osx.dmg" "Cuke4AS3 Developer.air"-->
+        <!--e.g. adt -package -target native "Cuke4AS3 Developer osx.dmg" "Cuke4AS3 Developer.air"-->
 
         <exec executable="${ADT}" failonerror="false" osfamily="unix" failifexecutionfails="true">
             <arg value="-package"/>
             <arg value="-target"/>
             <arg value="native"/>
-            <arg value="${bin.dir}/${project.name.versioned}.dmg"/>
+            <arg value="${bin.dir}/${project.name.versioned}.${NIX_FILE_EXT}"/>
             <arg value="${output.air}"/>
         </exec>
         <exec executable="${ADT}.bat" failonerror="false" osfamily="windows" failifexecutionfails="true">
@@ -382,7 +382,7 @@
             <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
 
             <arg value="-cucumber" />
-            <arg value="/usr/bin/cucumber" />
+            <arg value="${CUCUMBER_NIX}" />
             <arg value="-cucumberArgs" />
             <arg value="'--exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
 
@@ -405,9 +405,9 @@
             <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
 
             <arg value="-cucumber" />
-            <arg value="${RUBY}" />
+            <arg value="${RUBY_EXE}" />
             <arg value="-cucumberArgs" />
-            <arg value="'--exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
+            <arg value="'${CUCUMBER_EXE} --exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
 
             <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
             <!--<arg value="-headless" />-->
@@ -554,9 +554,9 @@
             <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
 
             <arg value="-cucumber" />
-            <arg value="/usr/bin/cucumber" />
+            <arg value="${CUCUMBER_NIX}" />
             <arg value="-cucumberArgs" />
-            <arg value="'--exclude cucumber-tck -t @cucumber'"/>
+            <arg value="'--exclude cucumber-tck'"/>
             <!--<arg value="'-f pretty -f html -o ${report.dir}/cucumber-selftest-report.html'" />-->
 
             <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
@@ -578,9 +578,9 @@
             <arg value="'-compiler.library-path '${FLEX_HOME}/frameworks/libs/air/' '${libs.dir}' '${bin.dir}''" />
 
             <arg value="-cucumber" />
-            <arg value="${RUBY}" />
+            <arg value="${RUBY_EXE}" />
             <arg value="-cucumberArgs" />
-            <arg value="'--exclude cucumber-tck -t @cucumber'" />
+            <arg value="'${CUCUMBER_EXE} --exclude cucumber-tck'" />
 
             <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
             <!--<arg value="-headless" />-->
