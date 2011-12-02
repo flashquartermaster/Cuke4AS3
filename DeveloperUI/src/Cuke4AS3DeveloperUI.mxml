@@ -528,11 +528,19 @@
             {
                 run();
             }
-
-            if( event.controlKey && event.keyCode == Keyboard.S && isRunning )
+            else if( event.controlKey && event.keyCode == Keyboard.S && isRunning )
             {
                 stop();
             }
+            else if( event.controlKey && event.keyCode == Keyboard.C)
+            {
+                tn.selectedIndex = 0;
+            }
+            else if( event.controlKey && event.keyCode == Keyboard.O)
+            {
+                tn.selectedIndex = 1;
+            }
+            
         }
         ]]>
 	</fx:Script>
