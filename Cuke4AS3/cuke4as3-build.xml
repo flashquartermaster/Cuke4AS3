@@ -400,7 +400,7 @@
 
             <arg value="--"/>
             <arg value="-srcDir" />
-            <arg value="${src.dir}" />
+            <arg value="${tests.dir}" />
 
             <arg value="-mxmlc" />
             <arg value="${FLEX_HOME}/bin/mxmlc.exe" />
