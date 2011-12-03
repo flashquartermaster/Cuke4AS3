@@ -11,7 +11,7 @@ Chromeless Application
 ======================
 As a chromeless app it can be run silently when installed from the commandline with the relevant args
 e.g.
-/Applications/Cuke4AS3-0.3.4-Alpha.app/Contents/MacOS/Cuke4AS3-0.3.4-Alpha [ARGS]
+/Applications/Cuke4AS3-n.n.n-Alpha.app/Contents/MacOS/Cuke4AS3-n.n.n-Alpha [ARGS]
 
 -srcDir path to the parent directory of your features directory (in double quotes)
 E.g. -srcDir "/Users/username/Documents/Adobe Flash Builder 4.5/Calculator/src/"
@@ -25,9 +25,13 @@ E.g. -mxmlc "/Applications/Adobe Flash Builder 4.5/sdks/4.5.1/bin/mxmlc"
 -mxmlcArgs Additional compiler args for your project e.g. project libs directory or air libs
 E.g. -mxmlcArgs "'-compiler-arg arg 'path with spaces' -other-compiler-arg arg'"
 
--cucumber osx: path to cucumber executable windows: path to ruby.exe
--cucumberArgs Additional cucumber args (windows: start with path to cucumber)
-E.g. -cucumberArgs "'-cucumber-arg arg -other-arg arg'"
+-cucumber
+OSX: path to cucumber executable
+Windows: path to ruby.exe
+
+-cucumberArgs Additional cucumber args
+(Windows: start with the path to cucumber)
+E.g. -cucumberArgs "'--cucumber-arg arg --other-arg arg'"
 (remember to output the cucumber results from -cucumberArgs e.g. "'-f html -o some/path/to.html'"
 or you wont get any results to view)
 
@@ -55,13 +59,26 @@ As a swc it can be used as a basis for an application with a UI e.g. The Develop
 Release Info
 ============
 
+Version 0.4.2
+=============
+
+Fixed: Null pointers in FlexUnit steps on linux and windows
+Added: Run build scripts on Linux and create rpm and deb (Note: rpm api has changed since air support was dropped so no rpms)
+Added: Check all cucumber arguments for errant behavior on all production platforms and document known issues
+Added: Set up Cuke4AS3 on relish
+Updated: Remove "file://" in swfToLoad on BinarySwfLoader
+Updated: Improve special characters replace regexp for formatting gerkin steps to actionscript function names for snippets
+Updated: Create build.properties cucumber location property and *nix native package file extension (dmg and deb) property
+Updated: Remove need for timestamp when packaging air with ADT
+
 Version 0.4.1
 =============
 
 Fixed: Swfloader never dispatches ErrorEvent.ERROR which should package up SecurityError and the two IOErrors
 Fixed: Nullpointer exception when application exits because init() has not been called
 Fixed: Move cucumber message making from StepInvoker to Cuke4as3Server. Invoker should know nothing about cucumber messages
-fixed: Move cucumber message making from StepMatcher to Cuke4as3Server. Matcher should know nothing about cucumber messages
+Fixed: Move cucumber message making from StepMatcher to Cuke4as3Server. Matcher should know nothing about cucumber messages
+Fixed: Create Capabilities.os switch in order to add cucumber executable to additional args for self testing steps on windows
 Added: Create command processor for cuke4as3 server
 
 Version 0.3.4

@@ -1,5 +1,5 @@
-@unit_testing @hamcrest @dev
-Feature: Unit Testing Features for Hamcrest
+@unit_testing @hamcrest @wip
+Feature: Unit Testing for Hamcrest
 	In order to make make unit test style assertions
 	I want to be able to support Hamcrest
 

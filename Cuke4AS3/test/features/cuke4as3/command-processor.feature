@@ -1,5 +1,5 @@
 @wire_protocol @command_processor
-Feature: Command Processor Features
+Feature: The Command Processor
         In order to process commands sent from cucumber using the wire protocol
         I want to use a command processor that accepts a command and some data
 
@@ -49,7 +49,7 @@ Feature: Command Processor Features
             When I send a valid <request>
             Then I receive:
             """
-            ["success","[Given (/^we're all wired$/)]\npublic function should_were_all_wired():void\n{\n\tthrow new Pending(\"Awaiting implementation\");\n}"]
+            ["success","[Given (/^we're all wired$/)]\npublic function should_we_re_all_wired():void\n{\n\tthrow new Pending(\"Awaiting implementation\");\n}"]
             """
 
         Examples:

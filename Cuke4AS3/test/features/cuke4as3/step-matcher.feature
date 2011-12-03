@@ -1,5 +1,5 @@
 @reflection @step_matcher
-Feature: Step Matcher Features
+Feature: Using the Step Matcher
         As a wire server, when cucumber asks me
         I want to be able to request a match for a step
         and to be told if a step is undefined or if it has invokable code behind it

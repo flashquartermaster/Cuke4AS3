@@ -80,7 +80,7 @@ package features.step_definitions
             if( validity == "valid" )
             {
                 // Please note: This makes a class at runtime and writes the bytes to a tmp swf file that we load in
-                _sut.swfToLoad = _filehelper.getValidSwfPath( Config.OUTPUT_SWF );
+                _sut.swfToLoad = "file://" + _filehelper.getValidSwfPath( Config.OUTPUT_SWF );
             }
             else if( validity == "invalid" )
             {

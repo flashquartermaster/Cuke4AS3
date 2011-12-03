@@ -1,5 +1,5 @@
 @reflection @swf_processor
-Feature: SWF Processor Features
+Feature: Using the SWF Processor
     In order to be able to match step definitions when cucumber asks for them
     I want to be able to analyse the step definitions and store them for future reference
 

@@ -1,5 +1,5 @@
 @core @reflection @net
-Feature: Server Only Features
+Feature: Running in Server Only mode
         In order to run cuke4As3 in server only mode because I am working with cucumber some other way (e.g. commnad line)
         and in no-compile mode because I am compiling my step definitions some other way
         I want to be able to run the the system just using the 'net' and 'reflection' packages

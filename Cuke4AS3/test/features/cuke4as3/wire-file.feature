@@ -1,5 +1,5 @@
 @wire_file
-Feature: Wire File Features
+Feature: Parsing the Wire File
     In order to run the wire server at the correct address
     I want to read the wire file
 

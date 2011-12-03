@@ -114,11 +114,10 @@ package com.flashquartermaster.cuke4as3.net
 			_sut.init();
 			
 			//Please note: This makes a class at runntime and writes the bytes to a tmp swf file that we load in
-			_sut.swfToLoad = _filehelper.getValidSwfPath( Config.OUTPUT_SWF );
+			_sut.swfToLoad = "file://" + _filehelper.getValidSwfPath( Config.OUTPUT_SWF );
 			
 			Async.handleEvent( this, _sut, Event.COMPLETE, onBinarySwfLoaderComnplete );
 			Async.failOnEvent( this, _sut, ErrorEvent.ERROR );
-//			Async.failOnEvent( this, _sut, SecurityErrorEvent.SECURITY_ERROR );
 			
 			_sut.load();
 		}
@@ -166,8 +165,8 @@ package com.flashquartermaster.cuke4as3.net
 		[Test]
 		public function should_set_swfToProcess():void
 		{
-			var filePath:String = File.separator + "blah" + File.separator + Config.OUTPUT_SWF;
-			var expectedResult:String = "file://" + filePath;
+			var filePath:String = "file://" + File.separator + "blah" + File.separator + Config.OUTPUT_SWF;
+			var expectedResult:String = filePath;
 			
 			assertThat( _sut.swfToLoad, nullValue() );
 			

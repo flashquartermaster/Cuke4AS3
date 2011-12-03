@@ -207,7 +207,7 @@ com.flashquartermaster.cuke4as3{
 		{	
 			info("Cuke4AS3 : loadCompiledSwf");
 			_binarySwfLoader.init();
-			_binarySwfLoader.swfToLoad = srcDir + File.separator + Config.OUTPUT_SWF;
+			_binarySwfLoader.swfToLoad = "file://" + srcDir + File.separator + Config.OUTPUT_SWF;
 			
 			addSwfLoaderListeners();
 			
@@ -263,7 +263,7 @@ com.flashquartermaster.cuke4as3{
 			_swfProcessor.processLoadedClasses();
 		}
 		
-		protected function onSwfProcessorError(event:Event):void
+		private function onSwfProcessorError(event:Event):void
 		{
 			info( "Cuke4AS3 : onSwfProcessorError :", event );
 			
@@ -274,7 +274,7 @@ com.flashquartermaster.cuke4as3{
 			exit();
 		}
 		
-		protected function onSwfProcessorComplete(event:Event):void
+		private function onSwfProcessorComplete(event:Event):void
 		{
 			info( "Cuke4AS3 : onSwfProcessorComplete :", event );
 			
@@ -318,7 +318,7 @@ com.flashquartermaster.cuke4as3{
 			_cuke4AS3Server.run();
 		}
 		
-		protected function onServerError(event:Event):void
+		private function onServerError(event:Event):void
 		{
 			info( "Cuke4AS3 : onServerError :", event );
 			
@@ -329,7 +329,7 @@ com.flashquartermaster.cuke4as3{
 			exit();
 		}
 		
-		protected function onServerRunning(event:Event):void
+		private function onServerRunning(event:Event):void
 		{
 			info( "Cuke4AS3 : onServerRunning :", event );
 			
@@ -372,7 +372,7 @@ com.flashquartermaster.cuke4as3{
 		}
 		
 		
-//		protected function onServerConnect(event:ServerSocketConnectEvent):void
+//		private function onServerConnect(event:ServerSocketConnectEvent):void
 //		{
 //			_cuke4AS3Server.server.removeEventListener( ServerSocketConnectEvent.CONNECT, onServerConnect );
 //			_cuke4AS3Server.cucumber.socket.addEventListener( Event.CLOSE, onCucumberClientClose );

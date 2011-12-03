@@ -80,10 +80,9 @@ package com.flashquartermaster.cuke4as3.util
 		public static function formatStepToFunctionName( s:String ):String
 		{
 			s = s.toLowerCase();
-			s = s.replace( /("|')/g, "" );
-			s = s.replace( /\s/g, "_" );
-			s = s.replace( /\d+/g, "number" );
-			s = s.replace( /:$/, "" );
+            s = s.replace(/\W+/g,"_");
+            s = s.replace( /^_|_$/g, "" );
+			s = s.replace( /\d+/g, "n" );
 			return s;
 		}
 		

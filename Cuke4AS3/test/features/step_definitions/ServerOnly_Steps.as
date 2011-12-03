@@ -36,15 +36,12 @@ package features.step_definitions
     import com.flashquartermaster.cuke4as3.reflection.StepInvoker;
     import com.flashquartermaster.cuke4as3.reflection.StepMatcher;
     import com.flashquartermaster.cuke4as3.reflection.SwfProcessor;
-    import com.flashquartermaster.cuke4as3.utilities.Pending;
     import com.flashquartermaster.cuke4as3.utilities.StepsBase;
     import com.flashquartermaster.cuke4as3.utilities.Table;
 
     import flash.events.ErrorEvent;
     import flash.events.Event;
-    import flash.events.IOErrorEvent;
     import flash.events.ProgressEvent;
-    import flash.events.SecurityErrorEvent;
     import flash.events.ServerSocketConnectEvent;
     import flash.net.Socket;
     import flash.system.ApplicationDomain;
@@ -88,7 +85,7 @@ package features.step_definitions
 
             _fileHelper = new FileHelper();
             // Please note: This makes a class at runtime and writes the bytes to a tmp swf file that we load in
-            _binarySwfLoader.swfToLoad = _fileHelper.getValidSwfPath( Config.OUTPUT_SWF, _mockPackageName, _mockClassName );
+            _binarySwfLoader.swfToLoad = "file://" + _fileHelper.getValidSwfPath( Config.OUTPUT_SWF, _mockPackageName, _mockClassName );
 
             Async.proceedOnEvent( this, _binarySwfLoader, Event.COMPLETE );
             Async.failOnEvent( this, _binarySwfLoader, ErrorEvent.ERROR );
@@ -171,18 +168,18 @@ package features.step_definitions
         {
             Async.handleEvent( this, _mockCucumber, ProgressEvent.SOCKET_DATA, onInvokeResponse, 5 * 1000 );
 
-            _mockCucumber.writeUTFBytes( "[\"invoke\",{\"args\":["+_argValue+"],\"id\":0}]\n" );
+            _mockCucumber.writeUTFBytes( "[\"invoke\",{\"args\":[" + _argValue + "],\"id\":0}]\n" );
             _mockCucumber.flush();
         }
-        
-        [Then (/^cucumber can disconnect when it is done$/,"async")]
+
+        [Then(/^cucumber can disconnect when it is done$/, "async")]
         public function should_cucumber_can_disconnect_when_it_is_done():void
         {
             //This indicate the end of the process
             Async.proceedOnEvent( this, _cuke4AS3Server.cucumber.socket, Event.CLOSE );
             _mockCucumber.close();
         }
-        
+
         override public function destroy():void
         {
             super.destroy();

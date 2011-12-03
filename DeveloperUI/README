@@ -15,6 +15,11 @@ outputs from your step definitions e.g. Displaying some telemetry about your app
 Release Info
 ============
 
+Version 0.4.2
+=============
+
+Added: Keyboard short cuts. Ctrl + r to run, Ctrl + s to stop, Ctrl + c for config and Ctrl + o for output
+
 Version 0.4.1
 =============
 

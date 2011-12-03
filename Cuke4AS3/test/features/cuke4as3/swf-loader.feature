@@ -1,5 +1,5 @@
 @swf_loader
-Feature: SWF Loader Features
+Feature: Using the SWF Loader
     In order to be able to get references to step definitions
     I want to be able to load a compiled swf that contains step definitions from the filesystem as a binary
 

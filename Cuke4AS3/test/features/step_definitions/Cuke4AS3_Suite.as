@@ -27,6 +27,7 @@
  **/
 package features.step_definitions
 {
+    import features.step_definitions.*;
     import flash.display.Sprite;
 
     public class Cuke4AS3_Suite extends Sprite

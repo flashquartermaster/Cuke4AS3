@@ -1,5 +1,5 @@
 @reflection @step_invoker
-Feature: Step Invoker features
+Feature: Using the Step Invoker
          As a wire server, when cucumber asks me
          I want to be able to request that a step definition be executed
          and find out if it is successful, pending or a failure

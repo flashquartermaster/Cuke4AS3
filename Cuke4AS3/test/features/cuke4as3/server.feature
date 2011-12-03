@@ -1,5 +1,5 @@
 @wire_server @net
-Feature: Wire Server Features
+Feature: The Wire Server
     In order to implement the wire protocol
     I need to have a server that cucumber can connect to
 

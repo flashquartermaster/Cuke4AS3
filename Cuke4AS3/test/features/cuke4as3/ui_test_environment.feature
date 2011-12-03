@@ -1,5 +1,5 @@
-@ui
-Feature: UI Test Environment Features
+@unit_testing @ui
+Feature: Fluint UI Test Environment
 	I want to be able to add visual assets
 	In order to verify their behavior
 

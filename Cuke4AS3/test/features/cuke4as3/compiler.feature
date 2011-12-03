@@ -1,5 +1,5 @@
 @compiler
-Feature: Compiler Features
+Feature: Running the ActionScript Compiler
     In order to compile actionscript step definitions
     I want to be able to run the actionscript compiler
 

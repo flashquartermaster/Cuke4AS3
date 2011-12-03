@@ -197,14 +197,14 @@ package com.flashquartermaster.cuke4as3.utils
 			var result:String = CucumberMessageMaker.snippetTextMessage( value );
 			
 			assertThat( result, equalTo( expected ) );
-		}
+        }
 		
 		[Test]
 		public function should_format_step_name_with_numbers_as_capturing_groups_and_args_for_snippet_text():void
 		{
 			var value:Object = {"step_keyword":"When","multiline_arg_class":"","step_name":"I have clicked the 5 button 2 times"};
 			var expected:String = "[When (/^I have clicked the (\\d+) button (\\d+) times$/)]\n" +
-				"public function should_i_have_clicked_the_number_button_number_times( n1:Number, n2:Number ):void\n" +
+				"public function should_i_have_clicked_the_n_button_n_times( n1:Number, n2:Number ):void\n" +
 				"{\n" +
 				"\tthrow new Pending(\"Awaiting implementation\");\n" +
 				"}";
@@ -219,7 +219,7 @@ package com.flashquartermaster.cuke4as3.utils
 		{
 			var value:Object = {"step_keyword":"When","multiline_arg_class":"","step_name":"I have clicked the \"add\" button 2 times"};
 			var expected:String = "[When (/^I have clicked the \"([^\"]*)\" button (\\d+) times$/)]\n" +
-				"public function should_i_have_clicked_the_add_button_number_times( s1:String, n1:Number ):void\n" +
+				"public function should_i_have_clicked_the_add_button_n_times( s1:String, n1:Number ):void\n" +
 				"{\n" +
 				"\tthrow new Pending(\"Awaiting implementation\");\n" +
 				"}";
@@ -250,7 +250,7 @@ package com.flashquartermaster.cuke4as3.utils
 		{
 			var value:Object = {"step_keyword":"When","multiline_arg_class":"Cucumber::Ast::Table","step_name":"I have clicked the \"add\" button 2 times"};
 			var expected:String = "[When (/^I have clicked the \"([^\"]*)\" button (\\d+) times$/)]\n" +
-				"public function should_i_have_clicked_the_add_button_number_times( s1:String, n1:Number, array:Array ):void\n" +
+				"public function should_i_have_clicked_the_add_button_n_times( s1:String, n1:Number, array:Array ):void\n" +
 				"{\n" +
 				"\tvar table:Table = new Table( array );\n" +
 				"\tthrow new Pending(\"Awaiting implementation\");\n" +
@@ -281,7 +281,7 @@ package com.flashquartermaster.cuke4as3.utils
 		{
 			var value:Object = {"step_keyword":"When","multiline_arg_class":"Cucumber::Ast::DocString","step_name":"I have clicked the \"add\" button 2 times:"};
 			var expected:String = "[When (/^I have clicked the \"([^\"]*)\" button (\\d+) times:$/)]\n" +
-				"public function should_i_have_clicked_the_add_button_number_times( s1:String, n1:Number, docString:String ):void\n" +
+				"public function should_i_have_clicked_the_add_button_n_times( s1:String, n1:Number, docString:String ):void\n" +
 				"{\n" +
 				"\tthrow new Pending(\"Awaiting implementation\");\n" +
 				"}";

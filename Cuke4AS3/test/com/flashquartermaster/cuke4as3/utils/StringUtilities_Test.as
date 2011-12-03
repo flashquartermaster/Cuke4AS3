@@ -176,13 +176,31 @@ package com.flashquartermaster.cuke4as3.utils
 		public function should_convert_string_to_lower_case_and_insert_underscores_in_place_of_spaces_and_strip_quotes():void
 		{
 			var inputValue:String = "I am 'a' STRING in \"need\" of 1 conversion";
-			var expected:String = "i_am_a_string_in_need_of_number_conversion";
+			var expected:String = "i_am_a_string_in_need_of_n_conversion";
 			
 			var result:String = StringUtilities.formatStepToFunctionName( inputValue );
 			
 			assertThat( result, equalTo( expected ) );
 		}
-		
+
+        [Test]
+		public function should_replace_special_characters_with_underscores_without_leaving_trailing_underscores_at_the_beginning_and_end():void
+		{
+			var inputValue1:String = " @([]{}()hello^$&.%#!@=<>:;,~*?world/+|-`'\'\"\\";
+			var expected1:String = "hello_world";
+
+			var result1:String = StringUtilities.formatStepToFunctionName( inputValue1 );
+
+			assertThat("Replace special characters in double quotes", result1, equalTo( expected1 ) );
+
+            var inputValue2:String = ' "@([]{}()hello^$&.%#!@=<>:;,~*?world/+|-`\'\" \\';
+			var expected2:String = "hello_world";
+
+			var result2:String = StringUtilities.formatStepToFunctionName( inputValue2 );
+
+			assertThat("Replace special characters in single quotes", result2, equalTo( expected2 ) );
+		}
+
 		[Test]
 		public function should_convert_text_in_quotes_to_reg_exp_capturing_group():void
 		{

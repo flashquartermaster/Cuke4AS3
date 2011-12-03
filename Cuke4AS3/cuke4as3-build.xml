@@ -124,6 +124,9 @@
         <java jar="${ADT.JAR}" fork="true" failonerror="true">
             <arg value="-package"/>
 
+            <!--<arg value="-tsa" />-->
+            <!--<arg value="none" />-->
+
             <arg value="-storetype"/>
             <arg value="${cert.storetype}"/>
 
@@ -148,7 +151,7 @@
 
         <echo>[generate-certificate] Generating ${project.title} certificate</echo>
 
-        <!--Note: Certficate values derived from main build.properties-->
+        <!--Note: Certificate values derived from main build.properties-->
         <!--in the parent directory-->
         
         <java jar="${ADT.JAR}" fork="true" failonerror="true">
@@ -384,7 +387,7 @@
             <arg value="-cucumber" />
             <arg value="${CUCUMBER_NIX}" />
             <arg value="-cucumberArgs" />
-            <arg value="'--exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
+            <arg value="'-e cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
 
             <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
             <!--<arg value="-headless" />-->
@@ -407,7 +410,7 @@
             <arg value="-cucumber" />
             <arg value="${RUBY_EXE}" />
             <arg value="-cucumberArgs" />
-            <arg value="'${CUCUMBER_EXE} --exclude cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
+            <arg value="'${CUCUMBER_EXE} -e cucumber-tck -f pretty -f html -o ${report.dir}/cucumber-selftest-report.html -f junit -o ${report.dir}'" />
 
             <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
             <!--<arg value="-headless" />-->
@@ -556,12 +559,11 @@
             <arg value="-cucumber" />
             <arg value="${CUCUMBER_NIX}" />
             <arg value="-cucumberArgs" />
-            <arg value="'--exclude cucumber-tck'"/>
-            <!--<arg value="'-f pretty -f html -o ${report.dir}/cucumber-selftest-report.html'" />-->
+            <arg value="'-e cucumber-tck'" />
 
-            <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
-            <!--<arg value="-headless" />-->
-            <!--<arg value="true" />-->
+            <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
+            <arg value="-headless" />
+            <arg value="true" />
         </exec>
         <exec executable="${ADL}.exe" failonerror="false" osfamily="windows">
             <arg value="-profile"/>
@@ -570,7 +572,7 @@
 
             <arg value="--"/>
             <arg value="-srcDir" />
-            <arg value="${src.dir}" />
+            <arg value="${tests.dir}" />
 
             <arg value="-mxmlc" />
             <arg value="${FLEX_HOME}/bin/mxmlc.exe" />
@@ -580,11 +582,11 @@
             <arg value="-cucumber" />
             <arg value="${RUBY_EXE}" />
             <arg value="-cucumberArgs" />
-            <arg value="'${CUCUMBER_EXE} --exclude cucumber-tck'" />
+            <arg value="'${CUCUMBER_EXE} -e cucumber-tck'" />
 
-            <!--Since we test cuke inside cuke we dont want to exit when any old cuke instance finsihes its test run-->
-            <!--<arg value="-headless" />-->
-            <!--<arg value="true" />-->
+            <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
+            <arg value="-headless" />
+            <arg value="true" />
         </exec>
     </target>
 

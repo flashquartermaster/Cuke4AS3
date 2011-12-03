@@ -202,8 +202,6 @@ package features.step_definitions
         override public function destroy():void
         {
             super.destroy();
-
-            _asyncObject = null;
         }
 
         private function dispatchSuccessEvent( event:TimerEvent ):void

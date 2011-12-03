@@ -174,7 +174,7 @@ package com.flashquartermaster.cuke4as3.net
 
         public function set swfToLoad( value:String ):void
         {
-            _swfToLoad = "file://" + value;
+            _swfToLoad = value;
         }
 
         public function get running():Boolean

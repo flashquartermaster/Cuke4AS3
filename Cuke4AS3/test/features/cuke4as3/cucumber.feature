@@ -1,5 +1,5 @@
 @cucumber
-Feature: Cucumber Features
+Feature: Running Cucumber
     In order to help actionscript developers adopt cucumber
     and by running it last to make the process as robust as possible
     I want to be able to run cucumber as an integrated part of

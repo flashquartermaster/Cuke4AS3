@@ -121,7 +121,7 @@ package features.step_definitions
             }
         }
 
-        [Then(/^compiler exits cleanly and reports (errors|success)/)]
+        [Then(/^compiler exits cleanly and reports (errors|success)$/)]
         public function should_exit_cleanly_and_report_success_state( result:String ):void
         {
 //          Exits cleanly means not exceptions to catch

@@ -90,6 +90,9 @@
         <java jar="${ADT.JAR}" fork="true" failonerror="true">
             <arg value="-package"/>
 
+            <!--<arg value="-tsa" />-->
+            <!--<arg value="none" />-->
+
             <arg value="-storetype"/>
             <arg value="${cert.storetype}"/>
 
@@ -114,7 +117,7 @@
 
         <echo>[generate-certificate] Generating ${project.title} certificate</echo>
 
-        <!--Note: Certficate values derived from main build.properties-->
+        <!--Note: Certificate values derived from main build.properties-->
         <!--in the parent directory-->
         
         <java jar="${ADT.JAR}" fork="true" failonerror="true">

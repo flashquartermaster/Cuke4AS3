@@ -1,5 +1,5 @@
 @unit_testing @flex_unit
-Feature: Unit Testing Features for FlexUnit
+Feature: Unit Testing for FlexUnit
 	In order to make make unit test style assertions
 	and leverage Asynchronous support
 	I want to be able to support FlexUnit
