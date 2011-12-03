@@ -1,5 +1,5 @@
 @core
-Feature: Running the completed application
+Feature: Running the Completed Application
 
     Considerations:
     Runs within an air application as a library
