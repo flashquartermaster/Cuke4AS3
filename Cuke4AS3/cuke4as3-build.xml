@@ -541,7 +541,7 @@
         </copy>
     </target>
 
-    <target name="test-changes">
+    <target name="test-new-code-changes" depends="compile-swc,make-air">
         <exec executable="${ADL}" failonerror="false" osfamily="unix" failifexecutionfails="true">
             <arg value="-profile"/>
             <arg value="extendedDesktop"/>
