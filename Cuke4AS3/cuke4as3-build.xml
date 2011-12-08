@@ -559,7 +559,7 @@
             <arg value="-cucumber" />
             <arg value="${CUCUMBER_NIX}" />
             <arg value="-cucumberArgs" />
-            <!--<arg value="'-t @core'" />-->
+            <arg value="'-t @step_matcher'" />
 
             <!--Since we test cuke inside cuke we don't want to exit when any old cuke instance finishes its test run-->
             <arg value="-headless" />

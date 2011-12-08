@@ -27,15 +27,15 @@
  **/
 package support
 {
-    public class Calculator_Steps
+    public class Calculator_Support_Steps
     {
-        public function Calculator_Steps()
+        public function Calculator_Support_Steps()
         {
         }
 
         // This matches the test data in the StepMatcher_Steps
         // for the duplicate step definition test 
-        [Given (/^I have entered (\\d+) into the calculator$/g)]
+        [Given (/^I have entered (\d+) into the calculator$/g)]
         public function pushNumber( n:Number ):void
         {
             //Some implementation

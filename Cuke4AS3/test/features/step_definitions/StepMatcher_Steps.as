@@ -81,8 +81,8 @@ package features.step_definitions
             else if( _stepType == "defined" && !_isDuplicate )
             {
                 // Mock a matchable step that would have been set by the swf processor
-                // The MockStepInvoker has been set up to say that it is executing a scenario on the support.Calculator_Steps object
-                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Steps" returnType="void">
+                // The MockStepInvoker has been set up to say that it is executing a scenario on the support.Calculator_Support_Steps object
+                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Support_Steps" returnType="void">
                     <parameter index="1" type="Number" optional="false"/>
                     <metadata name="Given">
                         <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
@@ -95,16 +95,17 @@ package features.step_definitions
             }
             else if( _stepType == "defined" && _isDuplicate )
             {
-                // Notice that the object that the step definition is invoked on is different Calculator_Steps and Calculator_UI_Steps
-                // The MockStepInvoker has been set up to say that it is executing a scenario on the Calculator_Steps object
-                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_UI_Steps" returnType="void">
+                // Notice that the object that the step definition is invoked on is different Calculator_Support_Steps
+                // and Calculator_Support_UI_Steps
+                // The MockStepInvoker has been set up to say that it is executing a scenario on the Calculator_Support_Steps object
+                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Support_UI_Steps" returnType="void">
                     <parameter index="1" type="Number" optional="false"/>
                     <metadata name="Given">
                         <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
                     </metadata>
                 </method> );
 
-                matchableStep += new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Steps" returnType="void">
+                matchableStep += new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Support_Steps" returnType="void">
                     <parameter index="1" type="Number" optional="false"/>
                     <metadata name="Given">
                         <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
@@ -136,7 +137,7 @@ package features.step_definitions
                 expectedResult.args = [
                     {"val":6, "pos":15}
                 ];//the number 6 will be found at character 15 in the string, this is for cucumbers highlighting
-                expectedResult.className = "support.Calculator_Steps";
+                expectedResult.className = "support.Calculator_Support_Steps";
                 expectedResult.regExp = "/^I have entered (\\d+) into the calculator$/g";
 
                 assertThat( "Success", _result.isMatch(), isTrue() );
@@ -152,7 +153,7 @@ package features.step_definitions
             else if( _stepType == "defined" && _isDuplicate )
             {
                 //This check is only concerned that the correct classname is being returned
-                expectedResult.className = "support.Calculator_Steps";
+                expectedResult.className = "support.Calculator_Support_Steps";
 
                 assertThat( "Source", _result.className, equalTo( expectedResult.className ) );
             }

@@ -70,7 +70,7 @@ package support
         public function get stepsObject():*
         {
             //just using this for the duplicate step match in the StepMatcher_Steps
-            return ( new Calculator_Steps() as Class );
+            return ( new Calculator_Support_Steps() as Class );
         }
 
         public function resetState():void
@@ -79,7 +79,7 @@ package support
 
         public function isExecutingClass( declaredBy:String ):Boolean
         {
-            return ( declaredBy == "support::Calculator_Steps" );
+            return ( declaredBy == "support::Calculator_Support_Steps" );
         }
 
         public function isExecutingScenario():Boolean

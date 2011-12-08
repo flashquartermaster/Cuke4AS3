@@ -27,70 +27,51 @@
  **/
 package features.step_definitions
 {
-	import com.furusystems.logging.slf4as.global.debug;
-	
-	import flash.display.Sprite;
-	
-	import org.flexunit.Assert;
-	import org.flexunit.asserts.fail;
-	import org.hamcrest.assertThat;
-	import org.hamcrest.core.not;
-	import org.hamcrest.object.equalTo;
+    public class Calculator_Steps
+    {
+        private var _calculator:Calculator;
+        private var _calculatorResult:Number;
 
-	public class Calculator_Steps
-	{
-		private var _calculator:Calculator;
-		private var _calculatorResult:Number;
-		
-		public function Calculator_Steps()
-		{
-			_calculator = new Calculator();
-		}
-		
-		[Given(/^I have entered (\d+) into the calculator$/g)]
-		public function pushNumber( n:Number ):void
-		{
-			_calculator.push( n );
-//			debug( "Calculator_Steps : pushNumber :",n);
-		}
-		
-		[When(/^I want it to (add|divide)$/)]
-		public function pressButton( button:String ):void
-		{
-//			debug( "Calculator_Steps : pressButton :",button);
-			if( button == "divide" )
-			{
-				_calculatorResult = _calculator.divide();
-			}
-			else if( button == "add" )
-			{
-				_calculatorResult = _calculator.add();
-			}
+        public function Calculator_Steps()
+        {
+            _calculator = new Calculator();
+        }
+
+        [Given(/^I have entered (\d+) into the calculator$/g)]
+        public function pushNumber( n:Number ):void
+        {
+            _calculator.push( n );
+        }
+
+        [When(/^I want it to (add|divide)$/)]
+        public function pressButton( button:String ):void
+        {
+            if( button == "divide" )
+            {
+                _calculatorResult = _calculator.divide();
+            }
+            else if( button == "add" )
+            {
+                _calculatorResult = _calculator.add();
+            }
             else
             {
-                throw new Error("Unknown operation : " + button);
+                throw new Error( "Unknown operation : " + button );
             }
-		}
-		
-		[Then(/^the current value should be (.*)$/)]
-		public function checkValue( value:Number ):void
-		{
-//			debug( "Calculator_Steps : checkValue :",value);
-			
-			if (_calculatorResult != value) {
-				throw new Error("Expected " + value + ", but got " + _calculatorResult);
-			}
-			
-//			assertThat( value, equalTo( _calculatorResult ) );
-//			assertThat( value, not( equalTo( _calculatorResult ) ) );
-			
-//			Assert.fail("Fail this step!");
-		}
-		
-		public function destroy():void
-		{
-//			debug("Calculator_Steps : destroy");
-			_calculator = null;
-		}
-	}
+        }
+
+        [Then(/^the current value should be (.*)$/)]
+        public function checkValue( value:Number ):void
+        {
+            if( _calculatorResult != value )
+            {
+                throw new Error( "Expected " + value + ", but got " + _calculatorResult );
+            }
+        }
+
+        public function destroy():void
+        {
+            _calculator = null;
+        }
+    }
 }

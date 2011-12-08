@@ -22,6 +22,7 @@
         import com.flashquartermaster.cuke4as3.Cuke4AS3;
         import com.flashquartermaster.cuke4as3.logging.DebugConsole;
         import com.flashquartermaster.cuke4as3.process.Process;
+        import com.furusystems.logging.slf4as.global.fatal;
 
         import mx.controls.Alert;
         import mx.events.FlexEvent;
@@ -126,6 +127,8 @@
 
         private function run( event:Event = null ):void
         {
+            _htmlLoader = null;
+
             isRunning = true;
 
             if( tn.selectedIndex != 1 )
@@ -290,6 +293,8 @@
 
         protected function onCucumberProcessError( event:ErrorEvent ):void
         {
+            fatal( "onCucumberProcessError" );
+
             visualMode_cb.selected = false;
 
             manageVisualMode();
@@ -360,6 +365,8 @@
 
         private function onCucumberClientClose( event:Event = null ):void
         {
+            fatal( "onCucumberClientClose " + event );
+
             completedUiUpdate();
 
             scrollCucumberOutputWindow();
@@ -477,6 +484,8 @@
             return text
         }
 
+        private var _htmlLoader:HTMLLoader;
+
         private function openHtmlOutput():void
         {
             if( cuke4AS3.cucumberProcess.argValidator != null )
@@ -493,8 +502,13 @@
                         this.nativeWindow.y + 90, this.nativeWindow.width - 100,
                         this.nativeWindow.height - 150 );
 
-                var htmlLoader:HTMLLoader = HTMLLoader.createRootWindow( true, null, true, bounds );
-                htmlLoader.load( new URLRequest( "file://" + htmlFilePath ) );
+                // This method is sometimes being called twice because client close event sometimes fires
+                // before cucumber process complete and sometimes after
+                if( _htmlLoader == null )
+                {
+                    _htmlLoader = HTMLLoader.createRootWindow( true, null, true, bounds );
+                    _htmlLoader.load( new URLRequest( "file://" + htmlFilePath ) );
+                }
             }
         }
 
