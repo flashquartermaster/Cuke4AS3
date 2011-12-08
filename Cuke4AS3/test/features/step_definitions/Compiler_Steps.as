@@ -80,7 +80,7 @@ package features.step_definitions
             }
             else if( codeType == "bad" )
             {
-                _sut.srcDir = FixtureConfig.EXAMPLE_CALCULATOR_BAD_DIR;
+                _sut.srcDir = FixtureConfig.EXAMPLE_CALCULATOR_BAD_COMPILE_DIR;
                 Async.proceedOnEvent( this, _sut, Process.SHELL_ERROR_EVENT, 5 * 1000 );
             }
             else

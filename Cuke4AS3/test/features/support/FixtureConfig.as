@@ -35,7 +35,8 @@ package features.support
 
         public static var EXAMPLES_DIR:String = "/Users/coxent01/Documents/Cuke4AS3/Examples";
         public static var EXAMPLE_CALCULATOR_DIR:String = EXAMPLES_DIR + "/Calculator/src";
-        public static var EXAMPLE_CALCULATOR_BAD_DIR:String = EXAMPLES_DIR + "/CalculatorBad/src";
+        public static var EXAMPLE_CALCULATOR_BAD_COMPILE_DIR:String = EXAMPLES_DIR + "/CalculatorBadCompile/src";
+        public static var EXAMPLE_CALCULATOR_BAD_CUCUMBER_DIR:String = EXAMPLES_DIR + "/CalculatorBadCucumber/src";
         public static var EXAMPLE_CALCULATOR_NO_WIRE_DIR:String = EXAMPLES_DIR + "/CalculatorNoWire/src";
 
 //        public static var FLEX_HOME:String = "C:\\flex_sdks\\flex_sdk_4.5.1";
@@ -45,7 +46,8 @@ package features.support
 //
 //        public static var EXAMPLES_DIR:String = "C:\\Cuke4AS3\\Examples";
 //        public static var EXAMPLE_CALCULATOR_DIR:String = EXAMPLES_DIR + "\\Calculator\\src";
-//        public static var EXAMPLE_CALCULATOR_BAD_DIR:String = EXAMPLES_DIR + "\\CalculatorBad\\src";
+//        public static var EXAMPLE_CALCULATOR_BAD_COMPILE_DIR:String = EXAMPLES_DIR + "\\CalculatorBadCompile\\src";
+//        public static var EXAMPLE_CALCULATOR_BAD_CUCUMBER_DIR:String = EXAMPLES_DIR + "\\CalculatorBadCucumber\\src";
 //        public static var EXAMPLE_CALCULATOR_NO_WIRE_DIR:String = EXAMPLES_DIR + "\\CalculatorNoWire\\src";
     }
 }

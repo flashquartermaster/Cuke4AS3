@@ -28,7 +28,6 @@
 package com.flashquartermaster.cuke4as3.reflection
 {
     import com.flashquartermaster.cuke4as3.events.InvokeMethodEvent;
-    import com.flashquartermaster.cuke4as3.util.CucumberMessageMaker;
     import com.flashquartermaster.cuke4as3.vo.InvokeInfo;
 
     import flash.events.EventDispatcher;
@@ -36,7 +35,6 @@ package com.flashquartermaster.cuke4as3.reflection
 
     import org.flexunit.async.Async;
     import org.hamcrest.assertThat;
-    import org.hamcrest.core.isA;
     import org.hamcrest.object.equalTo;
     import org.hamcrest.object.instanceOf;
     import org.hamcrest.object.isFalse;
@@ -117,7 +115,7 @@ package com.flashquartermaster.cuke4as3.reflection
         }
 
         [Test(async)]
-        public function should_invoke_and_run_a_function_and_fail_when_there_is_an_argument_mismatch():void
+        public function should_invoke_and_run_a_function_but_fail_when_there_is_an_argument_mismatch():void
         {
             _sut.applicationDomain = ApplicationDomain.currentDomain;
 
@@ -145,7 +143,7 @@ package com.flashquartermaster.cuke4as3.reflection
         }
 
         [Test(async)]
-        public function should_invoke_and_run_a_function_marked_as_async_and_fail_if_there_is_and_argument_mismatch():void
+        public function should_invoke_and_run_a_function_marked_as_async_but_fail_if_there_is_and_argument_mismatch():void
         {
             _sut.applicationDomain = ApplicationDomain.currentDomain;
 
@@ -156,6 +154,47 @@ package com.flashquartermaster.cuke4as3.reflection
             Async.handleEvent( this, _sut, InvokeMethodEvent.RESULT, onFailedAsyncInvokation );
 
             _sut.invoke( goodData );
+        }
+
+        [Test(async)]
+        public function should_determine_if_a_scenario_is_currently_executing():void
+        {
+            assertThat( "Executing Scenario at set up", _sut.isExecutingScenario(), isFalse() );
+
+            _sut.applicationDomain = ApplicationDomain.currentDomain;
+
+            var methodXml:XML = getTestMethodXml();
+
+            var invokeId:int = _sut.getInvokationId( methodXml );
+
+            var goodData:Object = {"args":["a string arg"], "id":invokeId};
+
+            Async.handleEvent( this, _sut, InvokeMethodEvent.RESULT, onSuccessfulInvokation );
+
+            _sut.invoke( goodData );
+
+            assertThat( "Executing Scenario after initial invocation", _sut.isExecutingScenario(), isTrue() );
+        }
+
+        [Test(async)]
+        public function should_be_able_to_determine_the_class_of_the_steps_object_being_executed():void
+        {
+            _sut.applicationDomain = ApplicationDomain.currentDomain;
+
+            var methodXml:XML = getTestMethodXml();
+
+            var invokeId:int = _sut.getInvokationId( methodXml );
+
+            var goodData:Object = {"args":["a string arg"], "id":invokeId};
+
+            Async.handleEvent( this, _sut, InvokeMethodEvent.RESULT, onSuccessfulInvokation );
+
+            _sut.invoke( goodData );
+
+            assertThat( _sut.stepsObject, notNullValue() );
+
+            assertThat( _sut.isExecutingClass( methodXml.@declaredBy ), isTrue() );
+            assertThat( _sut.isExecutingClass( "com.flashquartermaster.cuke4as3.reflection::StepMatcher_Test" ), isFalse() );
         }
 
         [Test(async)]
@@ -187,7 +226,7 @@ package com.flashquartermaster.cuke4as3.reflection
             //application domain is set but cannot be read
             //and therefore not tested
 
-            //Mock to check resetState is called
+            //Could mock to ensure resetState is called
 
             assertThat( _sut.stepsObject, nullValue() );
         }
@@ -235,12 +274,12 @@ package com.flashquartermaster.cuke4as3.reflection
         private function onInvokeWithBadData( event:InvokeMethodEvent, passThroughData:Object ):void
         {
             assertThat( event.type, equalTo( InvokeMethodEvent.RESULT ) );
-            assertThat( event.result, instanceOf( InvokeInfo) );
+            assertThat( event.result, instanceOf( InvokeInfo ) );
 
             var invokeInfo:InvokeInfo = event.result;
 
             assertThat( invokeInfo.isError(), isTrue() );
-            assertThat( invokeInfo.errorMessage, containsString("No invokable method found") );
+            assertThat( invokeInfo.errorMessage, containsString( "No invokable method found" ) );
             assertThat( invokeInfo.isPending(), isFalse() );
             assertThat( invokeInfo.isSuccess(), isFalse() );
         }
@@ -248,7 +287,7 @@ package com.flashquartermaster.cuke4as3.reflection
         private function onSuccessfulInvokation( event:InvokeMethodEvent, passThroughData:Object ):void
         {
             assertThat( event.type, equalTo( InvokeMethodEvent.RESULT ) );
-            assertThat( event.result, instanceOf( InvokeInfo) );
+            assertThat( event.result, instanceOf( InvokeInfo ) );
 
             var invokeInfo:InvokeInfo = event.result;
 
@@ -260,12 +299,12 @@ package com.flashquartermaster.cuke4as3.reflection
         private function onFailedInvokation( event:InvokeMethodEvent, passThroughData:Object ):void
         {
             assertThat( event.type, equalTo( InvokeMethodEvent.RESULT ) );
-            assertThat( event.result, instanceOf( InvokeInfo) );
+            assertThat( event.result, instanceOf( InvokeInfo ) );
 
             var invokeInfo:InvokeInfo = event.result;
 
             assertThat( invokeInfo.isError(), isTrue() );
-            assertThat( invokeInfo.errorMessage, containsString("Error #1063") );
+            assertThat( invokeInfo.errorMessage, containsString( "Error #1063" ) );
             assertThat( invokeInfo.errorName, equalTo( "ArgumentError" ) );
             assertThat( invokeInfo.isPending(), isFalse() );
             assertThat( invokeInfo.isSuccess(), isFalse() );
@@ -274,12 +313,12 @@ package com.flashquartermaster.cuke4as3.reflection
         private function onFailedAsyncInvokation( event:InvokeMethodEvent, passThroughData:Object ):void
         {
             assertThat( event.type, equalTo( InvokeMethodEvent.RESULT ) );
-            assertThat( event.result, instanceOf( InvokeInfo) );
+            assertThat( event.result, instanceOf( InvokeInfo ) );
 
             var invokeInfo:InvokeInfo = event.result;
 
             assertThat( invokeInfo.isError(), isTrue() );
-            assertThat( invokeInfo.errorMessage, containsString("Error #1063") );
+            assertThat( invokeInfo.errorMessage, containsString( "Error #1063" ) );
             assertThat( invokeInfo.errorName, equalTo( "ArgumentError" ) );
             assertThat( invokeInfo.isPending(), isFalse() );
             assertThat( invokeInfo.isSuccess(), isFalse() );

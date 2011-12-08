@@ -1,5 +1,5 @@
 @features
-Feature: Features Check File
+Feature: Supporting the technical elements of a feature file
 	As an implementer of the wire protocol
 	I want to ensure that I support all the features expected of a feature file
 	

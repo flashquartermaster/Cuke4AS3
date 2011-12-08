@@ -42,6 +42,7 @@ package features.step_definitions
     import org.hamcrest.core.allOf;
     import org.hamcrest.core.not;
     import org.hamcrest.object.equalTo;
+    import org.hamcrest.object.isFalse;
     import org.hamcrest.object.isTrue;
     import org.hamcrest.object.notNullValue;
     import org.hamcrest.text.containsString;
@@ -76,14 +77,14 @@ package features.step_definitions
             _sut.port = int( table.getRowItemByHeader( "port", 0 ) );
 
             _sut.addEventListener( ErrorEvent.ERROR, onServerError );
-            _sut.addEventListener( Event.COMPLETE, onServerRunning );
+            _sut.addEventListener( Event.INIT, onServerRunning );
 
         }
 
         [When(/^I run the server$/, "async")]
         public function server_should_run():void
         {
-            Async.proceedOnEvent( this, _sut, Event.COMPLETE, 1 * 1000 );
+            Async.proceedOnEvent( this, _sut, Event.INIT, 1 * 1000 );
             Async.failOnEvent( this, _sut, ErrorEvent.ERROR );
             _sut.run();
         }
@@ -99,7 +100,7 @@ package features.step_definitions
         [Given(/^it is running successfully$/, "async")]
         public function should_run_successfully():void
         {
-            Async.proceedOnEvent( this, _sut, Event.COMPLETE, 1 * 1000 );
+            Async.proceedOnEvent( this, _sut, Event.INIT, 1 * 1000 );
             Async.failOnEvent( this, _sut, ErrorEvent.ERROR );
             _sut.run();
         }
@@ -123,7 +124,9 @@ package features.step_definitions
             assertThat( "Listening", _sut.server.listening, isTrue() );
             assertThat( "Socket reference not null", _sut.cucumber.socket, notNullValue() );
             assertThat( "Socket connected", _mockCucumber.connected, isTrue() );
-            assertThat( "socket connected (server reference)", _sut.cucumber.socket.connected, isTrue() );
+
+            assertThat( "Socket connected (server reference)", _sut.isCucumberConnected(), isTrue() );
+            assertThat( "socket connected (control)", _sut.cucumber.socket.connected, isTrue() );
 
             var passThoughData:Object = new Object();
             passThoughData.content = "Hello Wire Server!";
@@ -140,13 +143,14 @@ package features.step_definitions
         [When(/^cucumber closes its connection$/, "async")]
         public function cucumber_should_close_connection():void
         {
-            Async.proceedOnEvent( this, _sut.cucumber.socket, Event.CLOSE );
+//          Note:  _sut.cucumber.socket Event.CLOSE triggers the server complete event
+//            Async.proceedOnEvent( this, _sut, Event.COMPLETE );
+            Async.handleEvent( this, _sut, Event.COMPLETE, onCucumberComplete );
             _mockCucumber.close();
-
         }
 
         [When(/^cucumber reconnects to it$/, "async")]
-        public function cucumber_should_cucumber_reconnect():void
+        public function cucumber_should_reconnect():void
         {
             _mockCucumber = null;
             _mockCucumber = new Socket();
@@ -293,6 +297,11 @@ package features.step_definitions
                     equalTo( expected1 ),
                     equalTo( expected2 ) )
             );
+        }
+
+        private function onCucumberComplete( event:Event, passThroughData:Object ):void
+        {
+            assertThat( _sut.isCucumberConnected(), isFalse() );
         }
     }
 }

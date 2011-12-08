@@ -1,5 +1,5 @@
 @reflection @swf_processor
-Feature: Using the SWF Processor
+Feature: Processing and Analysing The Contents of a Swf
     In order to be able to match step definitions when cucumber asks for them
     I want to be able to analyse the step definitions and store them for future reference
 
@@ -14,6 +14,6 @@ Feature: Using the SWF Processor
 
     #Is this a millstone or a necessity?
     Scenario: An error occurs because you have not added a steps class to the suite
-        Given an actionscript class file is missing from the suite of step definitions
+        Given an ActionScript class file is missing from the suite of step definitions
         When I process the loaded classes
         Then it will exit cleanly and confirm that the class is missing

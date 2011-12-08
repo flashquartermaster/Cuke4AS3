@@ -28,15 +28,9 @@
 package com.flashquartermaster.cuke4as3.net
 {
     import com.flashquartermaster.cuke4as3.Config;
-    import com.flashquartermaster.cuke4as3.events.InvokeMethodEvent;
     import com.flashquartermaster.cuke4as3.events.ProcessedCommandEvent;
-    import com.flashquartermaster.cuke4as3.reflection.IStepInvoker;
-    import com.flashquartermaster.cuke4as3.reflection.IStepMatcher;
     import com.flashquartermaster.cuke4as3.util.CucumberMessageMaker;
-    import com.flashquartermaster.cuke4as3.vo.InvokeInfo;
-    import com.flashquartermaster.cuke4as3.vo.MatchInfo;
     import com.furusystems.logging.slf4as.global.debug;
-    import com.furusystems.logging.slf4as.global.error;
     import com.furusystems.logging.slf4as.global.fatal;
     import com.furusystems.logging.slf4as.global.info;
     import com.furusystems.logging.slf4as.global.warn;
@@ -59,8 +53,6 @@ package com.flashquartermaster.cuke4as3.net
 
         private var _host:String;
         private var _port:int;
-
-
 
         public function Cuke4AS3Server()
         {
@@ -88,9 +80,9 @@ package com.flashquartermaster.cuke4as3.net
             {
                 if( _commandProcessor == null )
                 {
-                    throw new Error("No command processor, cannot process commands");
+                    throw new Error( "No command processor, cannot process commands" );
                 }
-                
+
                 if( _server == null )
                 {
                     init();
@@ -112,7 +104,7 @@ package com.flashquartermaster.cuke4as3.net
 
                 info( "Cuke4AS3Server : running on :", _server.localAddress + ":" + _server.localPort );
 
-                dispatchEvent( new Event( Event.COMPLETE ) );
+                dispatchEvent( new Event( Event.INIT ) );
             }
             catch( e:Error )
             {
@@ -156,8 +148,8 @@ package com.flashquartermaster.cuke4as3.net
                 var json_decoded:Array = _cucumber.jsonDecodeSocketData();
                 var action:String = json_decoded[0];
                 var data:Object = json_decoded[1] as Object;
-                
-                _commandProcessor.processCommand( action,  data );
+
+                _commandProcessor.processCommand( action, data );
             }
         }
 
@@ -168,12 +160,15 @@ package com.flashquartermaster.cuke4as3.net
 
         private function onCommandProcessedError( event:ProcessedCommandEvent ):void
         {
-            sendResultToCucumber( CucumberMessageMaker.failMessage( event.result[0]) );
+            sendResultToCucumber( CucumberMessageMaker.failMessage( event.result[0] ) );
         }
 
         private function sendResultToCucumber( return_array:Array ):void
         {
-            _cucumber.jsonEncodeAndSend( return_array );
+            if( _cucumber )//In case anything is still executing asynchronously after stop has been called
+            {
+                _cucumber.jsonEncodeAndSend( return_array );
+            }
         }
 
         private function onCucumberIOError( event:IOErrorEvent ):void
@@ -183,8 +178,8 @@ package com.flashquartermaster.cuke4as3.net
 
         private function onCucumberClientClose( event:Event ):void
         {
-            info( "Cuke4AS3Server : onCucumberClientClose:", event );
             removeSocketConnection();
+            dispatchEvent( new Event( Event.COMPLETE ) );
         }
 
         private function isChangedAddress():Boolean
@@ -203,16 +198,16 @@ package com.flashquartermaster.cuke4as3.net
 
         public function destroy():void
         {
-            info("Cuke4AS3Server : destroy");
+            info( "Cuke4AS3Server : destroy" );
 
             destroyServer();
             _host = null;
             _port = 0;
-            
-            if( _commandProcessor != null)
+
+            if( _commandProcessor != null )
             {
-                _commandProcessor.removeEventListener( ProcessedCommandEvent.SUCCESS, onCommandProcessedSuccess);
-                _commandProcessor.removeEventListener( ProcessedCommandEvent.ERROR, onCommandProcessedError);
+                _commandProcessor.removeEventListener( ProcessedCommandEvent.SUCCESS, onCommandProcessedSuccess );
+                _commandProcessor.removeEventListener( ProcessedCommandEvent.ERROR, onCommandProcessedError );
                 _commandProcessor.destroy();
                 _commandProcessor = null;
             }
@@ -255,6 +250,16 @@ package com.flashquartermaster.cuke4as3.net
             }
         }
 
+        public function isCucumberConnected():Boolean
+        {
+            var cucumberConnected:Boolean = false;
+            if( _cucumber != null && _cucumber.socket != null )
+            {
+                cucumberConnected = _cucumber.socket.connected;
+            }
+            return cucumberConnected;
+        }
+
         public function get server():ServerSocket
         {
             return _server;
@@ -288,8 +293,8 @@ package com.flashquartermaster.cuke4as3.net
         public function set commandProcessor( value:ICommandProcessor ):void
         {
             _commandProcessor = value;
-            _commandProcessor.addEventListener( ProcessedCommandEvent.SUCCESS, onCommandProcessedSuccess);
-            _commandProcessor.addEventListener( ProcessedCommandEvent.ERROR, onCommandProcessedError)
+            _commandProcessor.addEventListener( ProcessedCommandEvent.SUCCESS, onCommandProcessedSuccess );
+            _commandProcessor.addEventListener( ProcessedCommandEvent.ERROR, onCommandProcessedError )
         }
 
         private function runDebug():void

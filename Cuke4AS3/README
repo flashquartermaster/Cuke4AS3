@@ -59,6 +59,15 @@ As a swc it can be used as a basis for an application with a UI e.g. The Develop
 Release Info
 ============
 
+Version 0.4.3
+=============
+
+Fixed: Server unit test for blocked port does not pass on windows
+Added: If the same step appears in different feature files and has different implementations in different Steps objects the function is invoked on the correct object
+Added: Cuke build scripts get self-test-new-code target and documentation
+Updated: Be able to exit when cucumber is complete, throws an error or when closing its connection to the server
+Updated: Getting started documentation
+
 Version 0.4.2
 =============
 

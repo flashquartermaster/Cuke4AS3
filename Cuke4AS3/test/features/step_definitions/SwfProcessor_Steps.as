@@ -151,7 +151,7 @@ package features.step_definitions
             }
         }
 
-        [Given(/^an actionscript class file is missing from the suite of step definitions$/)]
+        [Given(/^an ActionScript class file is missing from the suite of step definitions$/)]
         public function should_ensure_file_is_missing():void
         {
             _sut.stepDirectoryFiles = getStepsDir( false );

@@ -29,7 +29,6 @@ package features.step_definitions
 {
     import com.flashquartermaster.cuke4as3.process.CucumberProcess;
     import com.flashquartermaster.cuke4as3.process.Process;
-    import com.flashquartermaster.cuke4as3.utilities.Pending;
     import com.flashquartermaster.cuke4as3.utilities.StepsBase;
     import com.furusystems.logging.slf4as.global.fatal;
 
@@ -37,7 +36,6 @@ package features.step_definitions
 
     import flash.events.Event;
     import flash.system.Capabilities;
-    import flash.system.System;
 
     import org.flexunit.async.Async;
     import org.hamcrest.assertThat;
@@ -51,7 +49,7 @@ package features.step_definitions
         private var _errorComplete:Boolean = false;
         private var _goodShellData:Boolean = false;
         private var _errorShellData:Boolean = false;
-        
+
         private var _isErrorCase:Boolean = false;
 
         public function Cucumber_Steps()
@@ -65,7 +63,7 @@ package features.step_definitions
             _sut.init();
             _sut.cucumberPath = FixtureConfig.CUCUMBER_EXE;
 
-            if( Capabilities.os.indexOf("Windows") != -1 )
+            if( Capabilities.os.indexOf( "Windows" ) != -1 )
             {
                 _sut.additionalArgs = FixtureConfig.WIN_CUCUMBER_EXE;
             }
@@ -89,7 +87,8 @@ package features.step_definitions
         [Then(/^cucumber reports its progress$/, "async")]
         public function should_report_progress():void
         {
-            if(!_isErrorCase ){
+            if( !_isErrorCase )
+            {
                 assertThat( "Reports cucumber progress", _goodShellData, isTrue() );
                 if( !_goodComplete )
                 {
@@ -119,13 +118,11 @@ package features.step_definitions
             }
         }
 
-        
-
-        [When(/^I run the cucumber against erroneous steps$/,"async")]
+        [When(/^I run the cucumber against erroneous steps$/, "async")]
         public function should_run_against_erroneous_steps():void
         {
             _isErrorCase = true;
-            _sut.srcDir = FixtureConfig.EXAMPLE_CALCULATOR_BAD_DIR;
+            _sut.srcDir = FixtureConfig.EXAMPLE_CALCULATOR_BAD_CUCUMBER_DIR;
             Async.proceedOnEvent( this, _sut, Process.SHELL_ERROR_EVENT, 5 * 1000 );
             _sut.run();
         }
@@ -135,7 +132,7 @@ package features.step_definitions
         {
             var args:String = "";
 
-            if( Capabilities.os.indexOf("Windows") != -1 )
+            if( Capabilities.os.indexOf( "Windows" ) != -1 )
             {
                 args += FixtureConfig.WIN_CUCUMBER_EXE + " ";
             }

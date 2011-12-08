@@ -1,5 +1,5 @@
 @wire_server @net
-Feature: The Wire Server
+Feature: Running The Cuke4AS3 Wire Server
     In order to implement the wire protocol
     I need to have a server that cucumber can connect to
 
@@ -17,7 +17,7 @@ Feature: The Wire Server
         When cucumber connects to it
         Then cucumber communicates with the server
 
-    Scenario: Multiple sequential connections
+    Scenario: Sequential connections
        Given it is running successfully
        When cucumber connects to it
        And cucumber communicates with the server

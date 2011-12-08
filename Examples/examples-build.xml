@@ -131,7 +131,8 @@
 
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${dist.dir}/Calculator"/>
-        <mkdir dir="${dist.dir}/CalculatorBad"/>
+        <mkdir dir="${dist.dir}/CalculatorBadCompile"/>
+        <mkdir dir="${dist.dir}/CalculatorBadCucumber"/>
         <mkdir dir="${dist.dir}/CalculatorNoWire"/>
 		<!--<mkdir dir="${dist.dir}/Selenium"/>-->
         <mkdir dir="${dist.dir}/reports"/>
@@ -141,8 +142,13 @@
                 <exclude name="*.iml"/>
 			</fileset>
 		</copy>
-        <copy todir="${dist.dir}/CalculatorBad">
-			<fileset dir="${calculator.bad.dir}">
+        <copy todir="${dist.dir}/CalculatorBadCompile">
+			<fileset dir="${calculator.badcompile.dir}">
+                <exclude name="*.iml"/>
+			</fileset>
+		</copy>
+        <copy todir="${dist.dir}/CalculatorBadCucumber">
+			<fileset dir="${calculator.badcucumber.dir}">
                 <exclude name="*.iml"/>
 			</fileset>
 		</copy>
@@ -173,7 +179,8 @@
         <delete file="${dist.dir}/examples-build.xml"/>
         <delete file="${dist.dir}/examples-build.properties"/>
 		<delete dir="${dist.dir}/Calculator"/>
-        <delete dir="${dist.dir}/CalculatorBad"/>
+        <delete dir="${dist.dir}/CalculatorBadCompile"/>
+        <delete dir="${dist.dir}/CalculatorBadCucumber"/>
         <delete dir="${dist.dir}/CalculatorNoWire"/>
 		<!--<delete dir="${dist.dir}/Selenium"/>-->
         <delete dir="${dist.dir}/reports"/>

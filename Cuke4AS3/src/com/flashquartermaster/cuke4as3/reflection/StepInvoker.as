@@ -29,11 +29,9 @@ package com.flashquartermaster.cuke4as3.reflection
 {
     import com.flashquartermaster.cuke4as3.events.InvokeMethodEvent;
     import com.flashquartermaster.cuke4as3.support.flexunit.MethodInvokationAsyncStatement;
-    import com.flashquartermaster.cuke4as3.util.CucumberMessageMaker;
     import com.flashquartermaster.cuke4as3.util.StringUtilities;
     import com.flashquartermaster.cuke4as3.utilities.Pending;
     import com.flashquartermaster.cuke4as3.vo.InvokeInfo;
-    import com.furusystems.logging.slf4as.global.debug;
     import com.furusystems.logging.slf4as.global.error;
     import com.furusystems.logging.slf4as.global.info;
     import com.furusystems.logging.slf4as.global.warn;
@@ -64,7 +62,7 @@ package com.flashquartermaster.cuke4as3.reflection
         {
             //data e.g. {"args":["3"],"id":0}
             _invokeInfo.destroy();
-            
+
             try
             {
                 var methodToRun:XML = _methodsToInvoke[ data.id ];
@@ -128,7 +126,7 @@ package com.flashquartermaster.cuke4as3.reflection
                 _invokeInfo.errorName = e.name;
                 _invokeInfo.errorTrace = e.getStackTrace();
             }
-            
+
             dispatchResult();
         }
 
@@ -163,13 +161,42 @@ package com.flashquartermaster.cuke4as3.reflection
             _applicationDomain = null;
         }
 
+        //CommandProcessor uses this to nullify the object to reset state between
+        //Scenario runs because we do not want to destroy
+        public function resetState():void
+        {
+            info( "StepInvoker : resetState" );
+            if( isExecutingScenario() )
+            {
+                try
+                {
+                    _stepsObject.destroy();
+                }
+                catch( e:Error )
+                {
+                    warn( "StepInvoker : resetState : No destroy method on", _stepsObject );
+                }
+                _stepsObject = null;
+            }
+        }
+
+        public function isExecutingClass( declaredBy:String ):Boolean
+        {
+            var classObject:Class = getClassObject( declaredBy );
+
+            return ( _stepsObject is classObject );
+        }
+
+        public function isExecutingScenario():Boolean
+        {
+            return _stepsObject != null;
+        }
+
         //Support functions
 
         private function makeStepsObject( methodToRun:XML ):void
         {
-            var className:String = StringUtilities.getClassNameFromDeclaredBy( methodToRun.@declaredBy );
-
-            var classObject:Class = _applicationDomain.getDefinition( className ) as Class;
+            var classObject:Class = getClassObject( methodToRun.@declaredBy );
 
             _stepsObject = new classObject();
         }
@@ -213,7 +240,14 @@ package com.flashquartermaster.cuke4as3.reflection
             dispatchResult();
         }
 
-        //Acessors
+        private function getClassObject( declaredBy:String ):Class
+        {
+            var className:String = StringUtilities.getClassNameFromDeclaredBy( declaredBy );
+
+            return _applicationDomain.getDefinition( className ) as Class;
+        }
+
+        //Accessors
 
         public function set applicationDomain( applicationDomain:ApplicationDomain ):void
         {
@@ -224,25 +258,5 @@ package com.flashquartermaster.cuke4as3.reflection
         {
             return _stepsObject;
         }
-
-        //CommandProcessor uses this to nullify the object to reset state between
-        //Scenario runs because we do not want to destroy
-        public function resetState():void
-        {
-            info( "StepInvoker : resetState" );
-            if( _stepsObject != null )
-            {
-                try
-                {
-                    _stepsObject.destroy();
-                }
-                catch( e:Error )
-                {
-                    warn( "StepInvoker : resetState : No destroy method on", _stepsObject );
-                }
-                _stepsObject = null;
-            }
-        }
-
     }
 }

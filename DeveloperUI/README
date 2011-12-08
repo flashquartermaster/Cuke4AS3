@@ -15,6 +15,11 @@ outputs from your step definitions e.g. Displaying some telemetry about your app
 Release Info
 ============
 
+Version 0.4.3
+=============
+
+Fixed: Button do not enable and disable correctly if no scenarios are run
+
 Version 0.4.2
 =============
 

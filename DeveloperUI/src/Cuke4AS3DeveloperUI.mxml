@@ -62,27 +62,20 @@
 //			cuke4AS3.swfLoader.addEventListener( Event.COMPLETE, onSwfLoaderComplete );
             //Show Error
             cuke4AS3.swfLoader.addEventListener( ErrorEvent.ERROR, onSwfLoaderError );
-            cuke4AS3.swfLoader.addEventListener( SecurityErrorEvent.SECURITY_ERROR, onSwfLoaderError );//Comes from UrlLoader
-            cuke4AS3.swfLoader.addEventListener( IOErrorEvent.IO_ERROR, onSwfLoaderError );//Can come from UrlLoader or Loader
 
             //Irrelevant for our purposes
 //		    cuke4AS3.swfProcessor.addEventListener( Event.COMPLETE, onSwfProcessorComplete );
             //Show Error
             cuke4AS3.swfProcessor.addEventListener( ErrorEvent.ERROR, onSwfProcessorError );
 
-            //Irrelevant
-            cuke4AS3.cuke4AS3Server.addEventListener( Event.COMPLETE, onServerRunning );
+            //Irrelevant for our purposes
+//            cuke4AS3.cuke4AS3Server.addEventListener( Event.INIT, onServerRunning );
+            //Indicate the end of a run
+            cuke4AS3.cuke4AS3Server.addEventListener( Event.COMPLETE, onCucumberClientClose );
             //Show Error
             cuke4AS3.cuke4AS3Server.addEventListener( ErrorEvent.ERROR, onServerError );
 
             cuke4AS3.cucumberProcess.addEventListener( Event.COMPLETE, onCucumberProcessComplete );
-            // We are all done running processes so when this one fires we just have to wait for cucumber
-            // to close the connection with the server to be sure we are done.
-            // This can be achieved by listening to
-            // cuke4AS3.cuke4AS3Server.server.addEventListener( ServerSocketConnectEvent.CONNECT, onCucumberConnect );
-            // then listening to
-            // cuke4AS3.cuke4AS3Server.cucumber.socket.addEventListener( Event.CLOSE, onCucumberClientClose );
-            // as shown in  onServerRunning
 
             //For output formatting
             cuke4AS3.cucumberProcess.addEventListener( Process.SHELL_DATA_EVENT, onCucumberShellData );
@@ -243,14 +236,8 @@
 
         protected function onCompilerProcessError( event:ErrorEvent ):void
         {
-            run_but.enabled = true;
-            stop_but.enabled = false;
+            completedUiUpdate();
 
-            isRunning = false;
-
-            compilerOutput.percentHeight = 80;
-            cucumberOutput.percentHeight = 20;
-            visualMode_cb.selected = false;
             manageVisualMode();
 
             manageProcessErrors( event );
@@ -292,24 +279,24 @@
 
         protected function onCucumberProcessComplete( event:Event ):void
         {
-            openHtmlOutput();
+            // We update the UI here instead on onCucumberClientClose because cucumber will never connect
+            // if it does not have any scenarios to run, however, the NativeProcess will complete
+
+            if( !cuke4AS3.cuke4AS3Server.isCucumberConnected() )
+            {
+                onCucumberClientClose();
+            }
         }
 
         protected function onCucumberProcessError( event:ErrorEvent ):void
         {
-            openHtmlOutput();
-
-            run_but.enabled = true;
-            stop_but.enabled = false;
-
-            isRunning = false;
-
-            compilerOutput.percentHeight = 20;
-            cucumberOutput.percentHeight = 80;
             visualMode_cb.selected = false;
+
             manageVisualMode();
 
             manageProcessErrors( event );
+
+            onCucumberClientClose();
         }
 
         private function manageProcessErrors( event:ErrorEvent ):void
@@ -371,27 +358,13 @@
             Alert.show( event.text, "Cuke4AS3 Error" );
         }
 
-        protected function onServerRunning( event:Event ):void
+        private function onCucumberClientClose( event:Event = null ):void
         {
-            cuke4AS3.cuke4AS3Server.server.addEventListener( ServerSocketConnectEvent.CONNECT, onCucumberConnect );
-        }
-
-        private function onCucumberConnect( event:ServerSocketConnectEvent ):void
-        {
-            cuke4AS3.cuke4AS3Server.cucumber.socket.addEventListener( Event.CLOSE, onCucumberClientClose );
-        }
-
-        private function onCucumberClientClose( event:Event ):void
-        {
-            run_but.enabled = true;
-            stop_but.enabled = false;
-
-            isRunning = false;
-
-            compilerOutput.percentHeight = 20;
-            cucumberOutput.percentHeight = 80;
+            completedUiUpdate();
 
             scrollCucumberOutputWindow();
+
+            openHtmlOutput();
         }
 
         //Browsing and selecting items
@@ -506,7 +479,10 @@
 
         private function openHtmlOutput():void
         {
-            htmlFilePath = cuke4AS3.cucumberProcess.argValidator.htmlFilePath;
+            if( cuke4AS3.cucumberProcess.argValidator != null )
+            {
+                htmlFilePath = cuke4AS3.cucumberProcess.argValidator.htmlFilePath;
+            }
 
             if( htmlFilePath != null )
             {
@@ -532,15 +508,26 @@
             {
                 stop();
             }
-            else if( event.controlKey && event.keyCode == Keyboard.C)
+            else if( event.controlKey && event.keyCode == Keyboard.C )
             {
                 tn.selectedIndex = 0;
             }
-            else if( event.controlKey && event.keyCode == Keyboard.O)
+            else if( event.controlKey && event.keyCode == Keyboard.O )
             {
                 tn.selectedIndex = 1;
             }
-            
+
+        }
+
+        private function completedUiUpdate():void
+        {
+            run_but.enabled = true;
+            stop_but.enabled = false;
+
+            isRunning = false;
+
+            compilerOutput.percentHeight = 20;
+            cucumberOutput.percentHeight = 80;
         }
         ]]>
 	</fx:Script>

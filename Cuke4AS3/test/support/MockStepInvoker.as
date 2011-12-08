@@ -32,7 +32,6 @@ package support
     import com.flashquartermaster.cuke4as3.vo.InvokeInfo;
 
     import flash.events.EventDispatcher;
-
     import flash.system.ApplicationDomain;
 
     public class MockStepInvoker extends EventDispatcher implements IStepInvoker
@@ -70,11 +69,22 @@ package support
 
         public function get stepsObject():*
         {
-            return null;
+            //just using this for the duplicate step match in the StepMatcher_Steps
+            return ( new Calculator_Steps() as Class );
         }
 
         public function resetState():void
         {
+        }
+
+        public function isExecutingClass( declaredBy:String ):Boolean
+        {
+            return ( declaredBy == "support::Calculator_Steps" );
+        }
+
+        public function isExecutingScenario():Boolean
+        {
+            return true;
         }
 
         public function destroy():void

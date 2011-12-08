@@ -98,7 +98,7 @@ package support
             makeValidfeaturesAndSteps();
 
             var wireFile:File = new File( _tmpDir.nativePath + File.separator
-                                                  + "features" + File.separator + "step_definitions" ).resolvePath( "com.flashquartermaster.cuke4as3.Cuke4AS3.wire" );
+                                                  + "features" + File.separator + "step_definitions" ).resolvePath( "cuke4as3.wire" );
 
             var stream:FileStream = new FileStream();
             stream.open( wireFile, FileMode.WRITE );
@@ -145,7 +145,7 @@ package support
 
             var tmpStepsDir:File = File.createTempDirectory();
             var i:uint = classNames.length;
-            while(--i > -1 )
+            while( --i > -1 )
             {
                 var step:File = new File( tmpStepsDir.nativePath + File.separator + classNames[i] + ".as" );
                 step.createDirectory();
@@ -158,7 +158,7 @@ package support
         {
             if( _tmpDir != null )
             {
-                _tmpDir.deleteDirectory( true );//delete dir and contents
+                _tmpDir.deleteDirectory( true );
                 _tmpDir = null
             }
 

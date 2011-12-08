@@ -98,7 +98,7 @@ package features.step_definitions
         {
             //TODO: Tidy up the step matcher and step invoker api's
 
-            // Having loaded the swf process the classes in the correct application domain
+            // Having loaded the swf, process the classes in the correct application domain
             var applicationDomain:ApplicationDomain = _binarySwfLoader.applicationDomain;
 
 //            Step invoker gets the code out of the application domain
@@ -140,7 +140,7 @@ package features.step_definitions
 
             _cuke4AS3Server.commandProcessor = commandProcessor;
 
-            Async.proceedOnEvent( this, _cuke4AS3Server, Event.COMPLETE );
+            Async.proceedOnEvent( this, _cuke4AS3Server, Event.INIT );
             Async.failOnEvent( this, _cuke4AS3Server, ErrorEvent.ERROR );
 
             _cuke4AS3Server.run();
@@ -172,11 +172,11 @@ package features.step_definitions
             _mockCucumber.flush();
         }
 
-        [Then(/^cucumber can disconnect when it is done$/, "async")]
-        public function should_cucumber_can_disconnect_when_it_is_done():void
+        [Then(/^I know when cucumber has finished using me$/, "async")]
+        public function cucumber_should_disconnect_when_done():void
         {
-            //This indicate the end of the process
-            Async.proceedOnEvent( this, _cuke4AS3Server.cucumber.socket, Event.CLOSE );
+            //This indicates the end of the process
+            Async.proceedOnEvent( this, _cuke4AS3Server, Event.COMPLETE );
             _mockCucumber.close();
         }
 

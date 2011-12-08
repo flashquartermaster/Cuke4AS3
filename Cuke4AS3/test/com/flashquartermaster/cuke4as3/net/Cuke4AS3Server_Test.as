@@ -33,6 +33,7 @@ package com.flashquartermaster.cuke4as3.net
     import flash.events.ErrorEvent;
     import flash.events.Event;
     import flash.events.EventDispatcher;
+    import flash.net.ServerSocket;
     import flash.net.Socket;
 
     import org.flexunit.async.Async;
@@ -52,6 +53,7 @@ package com.flashquartermaster.cuke4as3.net
     {
         private var _sut:Cuke4AS3Server;
         private var _mockCucumber:Socket;
+        private var _portBlocker:ServerSocket;
 
         [Before]
         public function set_up():void
@@ -69,6 +71,15 @@ package com.flashquartermaster.cuke4as3.net
                     _mockCucumber.close();
                 }
                 _mockCucumber = null;
+            }
+
+            if( _portBlocker != null )
+            {
+                if( _portBlocker.listening )
+                {
+                    _portBlocker.close();
+                }
+                _portBlocker = null;
             }
 
             _sut.destroy();
@@ -119,16 +130,22 @@ package com.flashquartermaster.cuke4as3.net
         [Test(async)]
         public function should_raise_error_event_when_using_a_bad_port():void
         {
-            Async.handleEvent( this, _sut, ErrorEvent.ERROR, onExpectedError, 500, new Cuke4AS3Server_Fixture_Support( _sut, "0.0.0.0", 443 ).passThroughData );
+            _portBlocker = new ServerSocket();
+            _portBlocker.bind( 12345, "0.0.0.0" );
+            _portBlocker.listen();
+
+            Async.handleEvent( this, _sut, ErrorEvent.ERROR, onExpectedError, 500, new Cuke4AS3Server_Fixture_Support( _sut, "0.0.0.0", 12345 ).passThroughData );
             Async.failOnEvent( this, _sut, Event.COMPLETE );
 
             _sut.run();
         }
 
-        [Test]
+        [Test(async)]
         public function should_raise_an_error_if_it_has_no_command_processor():void
         {
+            Async.proceedOnEvent( this, _sut, ErrorEvent.ERROR );
 
+            _sut.run();
         }
 
         [Test]
@@ -199,6 +216,13 @@ package com.flashquartermaster.cuke4as3.net
 
             assertThat( expectedResult.hasEventListener( ProcessedCommandEvent.SUCCESS ), isTrue() );
             assertThat( expectedResult.hasEventListener( ProcessedCommandEvent.ERROR ), isTrue() );
+        }
+
+        [Test]
+        public function should_get_cucumber_connected_info():void
+        {
+            assertThat( _sut.isCucumberConnected(), isFalse() );
+            assertThat( _sut.cucumber, nullValue() );
         }
 
         //Support

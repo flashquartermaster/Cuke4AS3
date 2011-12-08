@@ -25,27 +25,33 @@
  * @author Tom Coxen
  * @version
  **/
-package com.flashquartermaster.cuke4as3.reflection
+package
 {
-    import flash.events.IEventDispatcher;
-    import flash.system.ApplicationDomain;
-
-    public interface IStepInvoker extends IEventDispatcher
-    {
-        function invoke( data:Object ):void;
-
-        function getInvokationId( methodXml:XML ):uint;
-
-        function destroy():void;
-
-        function set applicationDomain( applicationDomain:ApplicationDomain ):void;
-
-        function get stepsObject():*;
-
-        function resetState():void;
-
-        function isExecutingClass( declaredBy:String ):Boolean;
-
-        function isExecutingScenario():Boolean
-    }
+	import flash.display.Sprite;
+	import flash.utils.describeType;
+	
+	public class Calculator extends Sprite
+	{
+		public var stack:Vector.<Number>;
+		
+		public function Calculator()
+		{
+			stack = new Vector.<Number>();
+		}
+		
+		public function push(n:Number):void
+		{
+			stack.push(n);	
+		}
+		
+		public function divide():Number
+		{
+			return stack[0] / stack[1];
+		}
+		
+		public function add():Number
+		{
+			return stack[0] + stack[1];
+		}
+	}
 }

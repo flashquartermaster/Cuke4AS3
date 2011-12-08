@@ -28,14 +28,11 @@
 package features.step_definitions
 {
     import com.flashquartermaster.cuke4as3.reflection.StepMatcher;
-    import com.flashquartermaster.cuke4as3.utilities.Pending;
     import com.flashquartermaster.cuke4as3.utilities.StepsBase;
     import com.flashquartermaster.cuke4as3.vo.MatchInfo;
 
     import org.hamcrest.assertThat;
-    import org.hamcrest.collection.array;
     import org.hamcrest.collection.arrayWithSize;
-    import org.hamcrest.mxml.object.IsFalse;
     import org.hamcrest.object.equalTo;
     import org.hamcrest.object.hasPropertyWithValue;
     import org.hamcrest.object.isFalse;
@@ -46,8 +43,9 @@ package features.step_definitions
     public class StepMatcher_Steps extends StepsBase
     {
         private var _sut:StepMatcher;
-        
+
         private var _stepType:String;
+        private var _isDuplicate:Boolean;
         private var _result:MatchInfo;
 
         // The step matcher matches a scenario step in a feature file
@@ -69,28 +67,52 @@ package features.step_definitions
             _sut = new StepMatcher( new MockStepInvoker() );
         }
 
-        [When(/^I ask for an? (defined|undefined) step$/)]
-        public function should_ask_for_a_step( stepType:String ):void
+        [When(/^I ask for an? (defined|undefined) step\s?(that can be matched more than once)?$/)]
+        public function should_ask_for_a_step( stepType:String, duplicate:String ):void
         {
+            _isDuplicate = (duplicate != "");
             _stepType = stepType;
+            var matchableStep:XMLList;
 
             if( _stepType == "undefined" )
             {
                 _result = _sut.match( "I an undefined step" );
             }
-            else if( _stepType == "defined" )
+            else if( _stepType == "defined" && !_isDuplicate )
             {
-                //Mock a matchable step that would have been set by the swf processor
-                var matchableStep:XMLList = 
-                        new XMLList( <method name="pushNumber" declaredBy="features.step_definitions::Calculator_Steps" returnType="void">
-                                        <parameter index="1" type="Number" optional="false"/>
-                                        <metadata name="Given">
-                                            <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
-                                        </metadata>
-                                    </method>);
+                // Mock a matchable step that would have been set by the swf processor
+                // The MockStepInvoker has been set up to say that it is executing a scenario on the support.Calculator_Steps object
+                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Steps" returnType="void">
+                    <parameter index="1" type="Number" optional="false"/>
+                    <metadata name="Given">
+                        <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
+                    </metadata>
+                </method> );
 
                 _sut.matchableSteps = matchableStep;
-                
+
+                _result = _sut.match( "I have entered 6 into the calculator" );
+            }
+            else if( _stepType == "defined" && _isDuplicate )
+            {
+                // Notice that the object that the step definition is invoked on is different Calculator_Steps and Calculator_UI_Steps
+                // The MockStepInvoker has been set up to say that it is executing a scenario on the Calculator_Steps object
+                matchableStep = new XMLList( <method name="pushNumber" declaredBy="support::Calculator_UI_Steps" returnType="void">
+                    <parameter index="1" type="Number" optional="false"/>
+                    <metadata name="Given">
+                        <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
+                    </metadata>
+                </method> );
+
+                matchableStep += new XMLList( <method name="pushNumber" declaredBy="support::Calculator_Steps" returnType="void">
+                    <parameter index="1" type="Number" optional="false"/>
+                    <metadata name="Given">
+                        <arg key="" value="/^I have entered (\\d+) into the calculator$/g"/>
+                    </metadata>
+                </method> );
+
+                _sut.matchableSteps = matchableStep;
+
                 _result = _sut.match( "I have entered 6 into the calculator" );
             }
             else
@@ -99,30 +121,40 @@ package features.step_definitions
             }
         }
 
-        [Then(/^I receive relevant information about the step$/)]
-        public function should_receive_relevant_information_about_the_step():void
+        [Then(/^I receive the correct information about the step$/)]
+        public function should_receive_correct_information_about_the_step():void
         {
+            var expectedResult:MatchInfo = new MatchInfo();
+
             if( _stepType == "undefined" )
             {
                 assertThat( _result.isUndefined(), isTrue() )
             }
-            else if( _stepType == "defined" )
+            else if( _stepType == "defined" && !_isDuplicate )
             {
-                var expectedResult:MatchInfo = new MatchInfo();
                 expectedResult.id = 0//This is the id returned by the mock step invoker
-                expectedResult.args = [{"val":6, "pos": 15}];//the number 6 will be found at character 15 in the string, this is for cucumbers highlighting
-                expectedResult.className = "features.step_definitions.Calculator_Steps";
+                expectedResult.args = [
+                    {"val":6, "pos":15}
+                ];//the number 6 will be found at character 15 in the string, this is for cucumbers highlighting
+                expectedResult.className = "support.Calculator_Steps";
                 expectedResult.regExp = "/^I have entered (\\d+) into the calculator$/g";
-                
-                assertThat("Success", _result.isMatch(), isTrue() );
-                assertThat("Success", _result.isUndefined(), isFalse() );
-                assertThat("Success", _result.isError(), isFalse() );
-                assertThat("Args size", _result.args, arrayWithSize(1) );
-                assertThat("Id", _result.id, equalTo( expectedResult.id ) );
-                assertThat("RegExp", _result.regExp, equalTo( expectedResult.regExp ) );
-                assertThat("Source", _result.className, equalTo( expectedResult.className ) );
-                assertThat("Args val", _result.args[0], hasPropertyWithValue( "val", expectedResult.args[0].val ) );
-                assertThat("Args pos", _result.args[0], hasPropertyWithValue( "pos", expectedResult.args[0].pos) );
+
+                assertThat( "Success", _result.isMatch(), isTrue() );
+                assertThat( "Success", _result.isUndefined(), isFalse() );
+                assertThat( "Success", _result.isError(), isFalse() );
+                assertThat( "Args size", _result.args, arrayWithSize( 1 ) );
+                assertThat( "Id", _result.id, equalTo( expectedResult.id ) );
+                assertThat( "RegExp", _result.regExp, equalTo( expectedResult.regExp ) );
+                assertThat( "Source", _result.className, equalTo( expectedResult.className ) );
+                assertThat( "Args val", _result.args[0], hasPropertyWithValue( "val", expectedResult.args[0].val ) );
+                assertThat( "Args pos", _result.args[0], hasPropertyWithValue( "pos", expectedResult.args[0].pos ) );
+            }
+            else if( _stepType == "defined" && _isDuplicate )
+            {
+                //This check is only concerned that the correct classname is being returned
+                expectedResult.className = "support.Calculator_Steps";
+
+                assertThat( "Source", _result.className, equalTo( expectedResult.className ) );
             }
         }
 
@@ -132,7 +164,7 @@ package features.step_definitions
 
             _sut.destroy();
             _sut = null;
-            
+
             _stepType = null;
             _result = null;
         }

@@ -27,33 +27,30 @@
  **/
 package com.flashquartermaster.cuke4as3
 {
-	import flash.filesystem.File;
+    import flash.filesystem.File;
 
-	public class Config
-	{
-		public static const OUTPUT_SWF:String = "cuke4as3_steps.swf";
-		public static const FEATURES_DIR:String = "features" + File.separator
-		public static const STEP_DEFINITIONS_DIR:String = FEATURES_DIR + "step_definitions" + File.separator;
-		public static const SUITE_NAME:String = "Cuke4AS3_Suite.as";
-		
-		//Error codes
-		//Cuke
-		public static const CUKE_CANNOT_RUN_ERROR:int = 1000;
-		public static const CUKE_NO_WIRE_FILE:int = 1001;
-		
-		//Server
-		public static const SERVER_CANNOT_RUN_ERROR:int = 2000;
-		public static const SERVER_RUN_ERROR:int = 2001;
-		//Process
-		public static const VALIDATION_ERROR:int = 3000;
+    public class Config
+    {
+        public static const OUTPUT_SWF:String = "cuke4as3_steps.swf";
+        public static const FEATURES_DIR:String = "features" + File.separator
+        public static const STEP_DEFINITIONS_DIR:String = FEATURES_DIR + "step_definitions" + File.separator;
+        public static const SUITE_NAME:String = "Cuke4AS3_Suite.as";
+
+        //Error codes
+        //Cuke
+        public static const CUKE_CANNOT_RUN_ERROR:int = 1000;
+        public static const CUKE_NO_WIRE_FILE:int = 1001;
+
+        //Server
+        public static const SERVER_CANNOT_RUN_ERROR:int = 2000;
+        public static const SERVER_RUN_ERROR:int = 2001;
+        //Process
+        public static const VALIDATION_ERROR:int = 3000;
         public static const ARGUMENTS_VALIDATION_ERROR:int = 3001;
-		public static const SHELL_EXIT_WITH_ERRORS:int = 3010;
-		public static const SHELL_EXIT_UNKNOWN_EXIT_CODE:int = 3011;
-		public static const FORCED_SHELL_EXIT:int = 3012;
-		
-		public static const COMPILER_ERRORS:int = 3020;
-		
-		
-		
-	}
+        public static const SHELL_EXIT_WITH_ERRORS:int = 3010;
+        public static const SHELL_EXIT_UNKNOWN_EXIT_CODE:int = 3011;
+        public static const FORCED_SHELL_EXIT:int = 3012;
+
+        public static const COMPILER_ERRORS:int = 3020;
+    }
 }

@@ -1,5 +1,5 @@
 @reflection @step_invoker
-Feature: Using the Step Invoker
+Feature: Running ActionScript on the fly
          As a wire server, when cucumber asks me
          I want to be able to request that a step definition be executed
          and find out if it is successful, pending or a failure
