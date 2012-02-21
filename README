@@ -3,8 +3,15 @@ Cuke4AS3 Developer allows ActionScript to be used for Cucumber step definitions
 Wiki Home:
 https://github.com/flashquartermaster/Cuke4AS3/wiki
 
-How to use Cuke4AS3 Developer:
+How to use Cuke4AS3 Developer UI:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/How-To-Use-Cuke4AS3
+
+Please note you do not have to use the Developer UI but it can be helpful if you area starting out or as a primer. 
+Cuke4AS3 is actually a library that you can implement your own UI over if you so wish or run in server only mode to 
+sit alongside Cucumber:
+https://github.com/flashquartermaster/Cuke4AS3/blob/master/Cuke4AS3/README
+https://github.com/flashquartermaster/Cuke4AS3/blob/master/Cuke4AS3/test/features/cuke4as3/server-only.feature
+https://github.com/flashquartermaster/Cuke4AS3/blob/master/Cuke4AS3/test/features/step_definitions/ServerOnly_Steps.as
 
 Important info on how to work with the source code:
 https://github.com/flashquartermaster/Cuke4AS3/wiki/Working-With-The-Source
